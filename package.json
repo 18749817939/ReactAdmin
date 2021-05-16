@@ -52,6 +52,7 @@
   "devDependencies": {},
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "proxy": "http://120.55.193.14:5000"
   
 }

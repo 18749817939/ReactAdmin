@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import {BrowserRouter} from 'react-router-dom'
 import Login from '../src/pages/Login/Login'
 class app extends Component {
   constructor(props) {
@@ -8,7 +9,10 @@ class app extends Component {
   render() {
     return (
       <>
-        <Login></Login>
+      <BrowserRouter>
+      <Login ></Login>
+
+      </BrowserRouter>
       </>
     );
   }
