@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import {BrowserRouter} from 'react-router-dom'
-import Login from '../src/pages/Login/Login'
+import { BrowserRouter, Route, Switch,Redirect } from 'react-router-dom'
+import Login from './pages/Login/Login'
+import Home from './pages/Home/Home'
 class app extends Component {
   constructor(props) {
     super(props);
@@ -9,10 +10,13 @@ class app extends Component {
   render() {
     return (
       <>
-      <BrowserRouter>
-      <Login ></Login>
-
-      </BrowserRouter>
+        <BrowserRouter>
+          <Switch>
+            <Route path='/login' component={Login}></Route>
+            <Route path='/home' component={Home}></Route>
+            <Redirect to='/login'></Redirect>          
+          </Switch>
+        </BrowserRouter>
       </>
     );
   }

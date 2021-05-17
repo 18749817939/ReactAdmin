@@ -1,15 +1,21 @@
+// 统一处理请求异常
 import axios from 'axios'
+import {message} from 'antd'
 const ajax = (url, data = {}, type = 'GET') => {
-  try {
+  return new Promise((resolve,reject)=>{
+    let promise
     if (type === 'GET') {
-      return axios.get(url, {
+      promise = axios.get(url, {
         params: data
       })
     } else {
-      return axios.post(url, data)
+      promise = axios.post(url, data)
     }
-  }catch(error){
-
-  }
+    promise.then(response=>{
+      resolve(response)
+    }).catch(error=>{
+      message.error(`请求出错：${error.message}`)
+    })
+  })
 }
 export default ajax;

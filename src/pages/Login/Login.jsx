@@ -2,18 +2,23 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import './Login.less'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
-import { Form, Input, Button } from 'antd'
+import { Form, Input, Button, message } from 'antd'
 import request from '../../api/ajax'
+import { localStorage } from '../../utils/index'
 function Login(props) {
   let history = useHistory()
   const onFinish = async (values) => {
     const { username, password } = values
+    const user = {username,password}
     const response = await request('/login', { username, password }, "POST")
-    const status = response.data.status
-    if (status === 0) {
-      history.push('/')
+    const data = response.data
+    if (data.status === 0) {
+      history.push('/home')
+      localStorage.saveUser(user)
+      console.log(localStorage.getUser())
+      message.success('登陆成功')
     } else {
-      console.log('error')
+      message.error(data.msg)
     }
   }
   return (
