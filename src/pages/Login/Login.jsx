@@ -1,11 +1,12 @@
 import React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useHistory, Redirect } from 'react-router-dom'
 import './Login.less'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { Form, Input, Button, message } from 'antd'
 import request from '../../api/ajax'
-import {connect} from 'react-redux'
-import { mapStateToProps,mapDispatchToProps } from '../../redux/action'
+import storage from '../../utils/storage'
+// import {connect} from 'react-redux'
+// import { mapStateToProps,mapDispatchToProps } from '../../redux/action'
 function Login(props) {
   let history = useHistory()
   const onFinish = async (values) => {
@@ -13,6 +14,8 @@ function Login(props) {
     const response = await request('/login', { username, password }, "POST")
     const data = response.data
     if (data.status === 0) {
+      const user = { ...values, name: 'user' }
+      storage.add(user)
       history.push('/home')
       message.success('登陆成功')
     } else {
@@ -20,6 +23,7 @@ function Login(props) {
     }
   }
   return (
+    !storage.get('user')?
     <div className="login">
       <div className='login-header'>
         <div className='icon-login-logo'></div>
@@ -68,7 +72,8 @@ function Login(props) {
         </Form>
       </div>
     </div>
+    :<Redirect to='/home' />
   )
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(Login)
+export default Login
