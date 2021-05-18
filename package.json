@@ -18,6 +18,7 @@
     "less-loader": "5.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "rope": "^1.0.1-pre",
@@ -54,5 +55,4 @@
   "author": "",
   "license": "ISC",
   "proxy": "http://120.55.193.14:5000"
-  
 }

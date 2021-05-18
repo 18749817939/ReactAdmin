@@ -1,19 +1,15 @@
 import React from 'react'
+import {connect} from 'react-redux'
 
-import { user, localStorage} from '../../utils/index'
-function Home() {
-  const admin = localStorage.getUser()
-  console.log(admin)
+import { mapStateToProps,mapDispatchToProps } from '../../redux/action'
+function Home(props) {
   return (
     <div>
-      {
-        console.log(admin)
-
-      }
-      Home{admin.username}{admin.password}
+      Home{props.user.name}
       
     </div>
   )
 }
 
-export default Home;
+
+export default connect(mapStateToProps,mapDispatchToProps)(Home)
