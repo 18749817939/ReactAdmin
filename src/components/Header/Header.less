@@ -1,4 +1,37 @@
 .header{
   height: 80px;
   background-color: orange;
+  display: flex;
+  flex-direction: column;
+  // justify-content: space-between;
+  .headeer-top{
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    // background-color: red;
+    .login-out-btn{
+      outline: none;
+      border: none;
+      background-color: transparent;
+      margin: 0 20px 0 5px;
+    }
+  }
+  .header-line{
+    width: 100%;
+    border-bottom: green 1px solid;
+  }
+  .header-bottom{
+    width: 100%;
+    height: 39px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    .home-page{
+      margin-left: 8%;
+      background-color: red;
+    }
+  }
 }
