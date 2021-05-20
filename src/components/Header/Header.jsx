@@ -16,17 +16,19 @@ function Header() {
   }
   const [time, setTime] = useState(dateFormat(new Date()))
   const loginOut = () => {
-    storage.remove('user')
+    storage.removeAll()
     history.replace('/login')
   }
-  (async () => {
+  const getWeather = async () => {
     const response = await request('https://restapi.amap.com/v3/weather/weatherInfo?city=110108&key=abf2bd1766e851d8067f088e3080ad5c')
     setWeather(response.data.lives[0].weather)
-  })()
+  }
   useEffect(() => {
     setInterval(() => {
       setTime(dateFormat(new Date()))
     }, 1000)
+  getWeather()
+
   }, [])
   return (
     <div className='header'>
@@ -39,14 +41,16 @@ function Header() {
       <div className='header-line'></div>
       <div className='header-bottom'>
         <div className='home-page'>
-          首页
+          {
+            storage.get('title')?storage.get('title').title:'首页'
+          }
         </div>
         <div className='time-weather'>
           <div className='time'>
             {time}
           </div>
           <div className='weather'>
-            <FrownOutlined />{weather}
+            <FrownOutlined className='icon-weather' />{weather}
           </div>
         </div>
       </div>
