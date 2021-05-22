@@ -1,26 +1,42 @@
 import React from 'react'
 import './LeftNav.less'
 import { Menu } from 'antd';
-import {
-  HomeOutlined,
-  QrcodeOutlined,
-  UserOutlined,
-  SafetyOutlined,
-  AreaChartOutlined,
-  UnorderedListOutlined,
-  ToolOutlined,
-  BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
-} from '@ant-design/icons';
 import { NavLink } from 'react-router-dom'
 import storage from '../../utils/storage'
-
+import { menuList } from '../../config/menuConfig'
 const { SubMenu } = Menu;
 function LeftNav() {
-  const getTitle = (title)=>{
-    const titleObj = {name:'title',title}
+  const setTitle = (title, key,openkey = '') => {
+    const titleObj = { name: 'title', title, key,openkey }
     storage.add(titleObj)
+  }
+  const getmenuList = (menulist) => {
+    return menulist.map(item => {
+      if (!item.children) {
+        return <Menu.Item key={item.key} title={item.title} icon={item.icon}>
+          <NavLink to={item.key} onClick={()=>{setTitle(item.title,item.key)}}>
+            {
+              item.title
+            }
+          </NavLink>
+        </Menu.Item>
+      } else {
+        return <SubMenu key={item.key} icon={item.icon} title={item.title}>
+          {
+            item.children.map(itemc => {
+              return <Menu.Item key={itemc.key} title={itemc.title} icon={itemc.icon}>
+                <NavLink to={itemc.key} onClick={()=>{setTitle(itemc.title,itemc.key,item.key)}}>
+                  {
+                    // this.item.key
+                    itemc.title
+                  }
+                </NavLink>
+              </Menu.Item>
+            })
+          }
+        </SubMenu>
+      }
+    })
   }
   return (
     <div className='left-nav'>
@@ -30,55 +46,18 @@ function LeftNav() {
       </div>
       <div style={{ width: 200, height: '100%' }}>
         <Menu
-          defaultSelectedKeys={['1']}
-          defaultOpenKeys={['sub1']}
+          defaultSelectedKeys={
+            storage.get('title') ? [`${storage.get('title').key}`] : ['/home/center']
+          }
+          defaultOpenKeys={
+            storage.get('title').openkey?[`${storage.get('title').openkey}`]:[]
+          }
           mode="inline"
           theme="dark"
         >
-          <Menu.Item key="1" title='首页' icon={<HomeOutlined />}>
-            <NavLink to='/home/center' onClick={()=>{getTitle('首页')}}>
-              首页
-            </NavLink>
-          </Menu.Item>
-          <SubMenu key="sub0" icon={<QrcodeOutlined />} title="商品">
-            <Menu.Item key="5" title='品类管理' icon={<UnorderedListOutlined />}>
-              <NavLink to='/home/category' onClick={()=>{getTitle('品类管理')}}>
-                品类管理
-              </NavLink>
-            </Menu.Item>
-            <Menu.Item key="6" title='商品管理' icon={<ToolOutlined />}>
-              <NavLink to='/home/product' onClick={()=>{getTitle('商品管理')}}>
-                商品管理
-              </NavLink>
-            </Menu.Item>
-          </SubMenu>
-          <Menu.Item key="2" title='用户管理' icon={<UserOutlined />}>
-            <NavLink to='/home/user' onClick={()=>{getTitle('用户管理')}}>
-              用户管理
-            </NavLink>
-          </Menu.Item>
-          <Menu.Item key="3" title='角色管理' icon={<SafetyOutlined />}>
-            <NavLink to='/home/role' onClick={()=>{getTitle('角色管理')}}>
-              角色管理
-            </NavLink>
-          </Menu.Item>
-          <SubMenu key="sub2" icon={<AreaChartOutlined />} title="图形图标">
-            <Menu.Item key="9" title='柱形图' icon={<BarChartOutlined />}>
-              <NavLink to='/home/chartpillar' onClick={()=>{getTitle('柱形图')}}>
-                柱形图
-              </NavLink>
-            </Menu.Item>
-            <Menu.Item key="11" title='折线图' icon={<LineChartOutlined />}>
-              <NavLink to='/home/chartline' onClick={()=>{getTitle('折线图')}}>
-                折线图
-              </NavLink>
-            </Menu.Item>
-            <Menu.Item key="12" title='饼图' icon={<PieChartOutlined />}>
-              <NavLink to='/home/chartcircle' onClick={()=>{getTitle('饼图')}}>
-                饼图
-              </NavLink>
-            </Menu.Item>
-          </SubMenu>
+          {
+            getmenuList(menuList)
+          }
         </Menu>
       </div>
     </div>
