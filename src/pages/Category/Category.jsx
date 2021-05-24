@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './Category.less'
 import { Card, Button, Table, Spin } from 'antd';
 import request from '../../api/ajax'
-import { PlusOutlined ,ArrowRightOutlined} from '@ant-design/icons'
+import { PlusOutlined, ArrowRightOutlined } from '@ant-design/icons'
 function Category() {
   const [category, setCategory] = useState([])
   const [parentId, setParentId] = useState('0')
@@ -25,7 +25,7 @@ function Category() {
     setisLoading(true)
     setParentName(category.name)
   }
-  const goBack = ()=>{
+  const goBack = () => {
     setParentId('0')
     setisLoading(true)
     setParentName('')
@@ -62,12 +62,12 @@ function Category() {
       <Spin size="large" className='spin' />
     </div> :
       <Card title={
-        parentId === '0'?"一级分类列表":
-        <div className='category-back'>
-          <Button onClick={goBack} type="link" className='category-back-btn'>一级分类列表</Button><ArrowRightOutlined />{`${parentName}`}
-        </div>
-      } 
-      className='category'
+        parentId === '0' ? "一级分类列表" :
+          <div className='category-back'>
+            <Button onClick={goBack} type="link" className='category-back-btn'>一级分类列表</Button><ArrowRightOutlined />{`${parentName}`}
+          </div>
+      }
+        className='category'
         extra={<Button className='add-btn' type='primary'>
           <PlusOutlined />添加
       </Button>}
