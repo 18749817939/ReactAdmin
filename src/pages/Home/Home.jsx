@@ -20,14 +20,13 @@ function Home(props) {
   const user = storage.get('user')
   return (
     user ?
-      <Layout style={{ height: "100%" }} >
+      <Layout style={{ height: "100%" , width: "100%" }} >
         <Sider>
           <LeftNav></LeftNav>
         </Sider>
         <Layout className='header-context-footer'>
           <Header></Header>
-          <Content className='context-container' >
-            <div className='context' >
+          <Content className='context-container' style={{ margin:20,backgroundColor: "white"}}>
               <Switch>
                 <Route path='/home/center' component={Center}></Route>
                 <Route path='/home/category' component={Category}></Route>
@@ -39,7 +38,6 @@ function Home(props) {
                 <Route path='/home/user' component={User}></Route>
                 <Redirect to='/home/center'></Redirect>
               </Switch>
-            </div>
           </Content>
             <Footer className='footer'>
               推荐使用谷歌浏览器，可以获得更佳页面操作体验

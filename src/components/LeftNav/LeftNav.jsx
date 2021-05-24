@@ -50,7 +50,7 @@ function LeftNav() {
             storage.get('title') ? [`${storage.get('title').key}`] : ['/home/center']
           }
           defaultOpenKeys={
-            storage.get('title').openkey?[`${storage.get('title').openkey}`]:[]
+            storage.get('title')?[`${storage.get('title').openkey}`]:[]
           }
           mode="inline"
           theme="dark"

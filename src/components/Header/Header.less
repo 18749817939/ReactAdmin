@@ -16,11 +16,12 @@
       border: none;
       background-color: transparent;
       margin: 0 20px 0 5px;
+      color: #1DA57A;
     }
   }
   .header-line{
     width: 100%;
-    border-bottom: green 1px solid;
+    border-bottom: #1DA57A 1px solid;
   }
   .header-bottom{
     width: 100%;
@@ -30,9 +31,22 @@
     align-items: center;
     justify-content: space-between;
     .home-page{
+      width: 80px;
+      text-align: center;
       margin-left: 8%;
       font-size: 18px;
-      // background-color: red;
+      position: relative;
+      &::after{
+        content: '';
+        position: absolute;
+        border-top: 20px solid #ffffff;
+        border-bottom: 20px solid transparent;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+        transform: translateX(50%);
+        right: 50%;
+        top: 100%;
+      }
     }
     .time-weather{
       display: flex;
