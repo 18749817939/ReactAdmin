@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react'
 import './Category.less'
 import { Card, Button, Table, Spin } from 'antd';
 import request from '../../api/ajax'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined ,ArrowRightOutlined} from '@ant-design/icons'
 function Category() {
   const [category, setCategory] = useState([])
   const [parentId, setParentId] = useState('0')
   const [isLoading, setisLoading] = useState(true)
+  const [parentName, setParentName] = useState('')
   const get = async (parentId) => {
     const response = await request('/manage/category/list', { parentId });
     const arr = response.data.data.map(item => {
@@ -18,11 +19,17 @@ function Category() {
     })
     setCategory(arr)
     setisLoading(false)
-
   }
   const showCategory = (category) => {
     setParentId(category.key)
     setisLoading(true)
+    setParentName(category.name)
+  }
+  const goBack = ()=>{
+    setParentId('0')
+    setisLoading(true)
+    setParentName('')
+
   }
   useEffect(() => {
     setTimeout(() => {
@@ -54,7 +61,13 @@ function Category() {
     isLoading ? <div className='spin'>
       <Spin size="large" className='spin' />
     </div> :
-      <Card title="一级分类列表" className='category'
+      <Card title={
+        parentId === '0'?"一级分类列表":
+        <div className='category-back'>
+          <Button onClick={goBack} type="link" className='category-back-btn'>一级分类列表</Button><ArrowRightOutlined />{`${parentName}`}
+        </div>
+      } 
+      className='category'
         extra={<Button className='add-btn' type='primary'>
           <PlusOutlined />添加
       </Button>}
@@ -62,7 +75,7 @@ function Category() {
         <Table
           bordered className='table'
           dataSource={category} columns={columns}
-          pagination={{ defaultPageSize: 3 }}
+          pagination={{ defaultPageSize: 5 }}
         />
       </Card>
   )
