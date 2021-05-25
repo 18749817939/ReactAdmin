@@ -1,6 +1,4 @@
 import React from 'react'
-// import {connect} from 'react-redux'
-// import { mapStateToProps,mapDispatchToProps } from '../../redux/action'
 import storage from '../../utils/storage'
 import './Home.less'
 import { Redirect, Switch, Route } from 'react-router-dom'
@@ -18,6 +16,7 @@ import ChartLine from '../ChartLine/ChartLine'
 const { Footer, Sider, Content } = Layout;
 function Home(props) {
   const user = storage.get('user')
+  const title = storage.get('title')
   return (
     user ?
       <Layout style={{ height: "100%" , width: "100%" }} >
@@ -36,7 +35,7 @@ function Home(props) {
                 <Route path='/home/chartline' component={ChartLine}></Route>
                 <Route path='/home/role' component={Role}></Route>
                 <Route path='/home/user' component={User}></Route>
-                <Redirect to='/home/center'></Redirect>
+                <Redirect to={title?title.key:'/home/center'}></Redirect>
               </Switch>
           </Content>
             <Footer className='footer'>

@@ -10,14 +10,13 @@ function Login(props) {
   const onFinish = async (values) => {
     const { username, password } = values
     const response = await request('/login', { username, password }, "POST")
-    const data = response.data
-    if (data.status === 0) {
+    if (response.status === 0) {
       const user = { ...values, name: 'user' }
       storage.add(user)
       history.push('/home')
       message.success('登陆成功')
     } else {
-      message.error(data.msg)
+      message.error(response.msg)
     }
   }
   return (

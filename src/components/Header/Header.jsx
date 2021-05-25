@@ -13,7 +13,7 @@ function Header() {
     if (!time) return ''
     return `${time.getFullYear()}-${time.getMonth()}-${time.getDate()}`
       + " " +
-      `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`
+      `${time.getHours()}:${time.getMinutes()>=10?time.getMinutes():'0'+time.getMinutes()}:${time.getSeconds()>=10?time.getSeconds():'0'+time.getSeconds()}`
   }
   const [time, setTime] = useState(dateFormat(new Date()))
   const loginOut = () => {
@@ -33,7 +33,7 @@ function Header() {
   }
   const getWeather = async () => {
     const response = await request('https://restapi.amap.com/v3/weather/weatherInfo?city=110108&key=abf2bd1766e851d8067f088e3080ad5c')
-    setWeather(response.data.lives[0].weather)
+    setWeather(response.lives[0].weather)
   }
   useEffect(() => {
     const timer =  setInterval(() => {

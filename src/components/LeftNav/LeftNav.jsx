@@ -42,7 +42,7 @@ function LeftNav() {
     <div className='left-nav'>
       <div className='left-nav-header'>
         <div className='header-logo'></div>
-        <div className='item-name'>硅谷后台</div>
+        <div className='item-name'>瞎写的后台</div>
       </div>
       <div style={{ width: 200, height: '100%' }}>
         <Menu
