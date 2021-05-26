@@ -5,17 +5,13 @@ import request from '../../api/ajax'
 import { PlusOutlined, ArrowRightOutlined } from '@ant-design/icons'
 const { Option } = Select;
 function Category() {
-  const [category, setCategory] = useState([])
-  const [parentId, setParentId] = useState('0')
+  const [category, setCategory] = useState([])//用于在子分类中展示一级分类列表
+  const [parentId, setParentId] = useState('0')//发送请求的ID
   const [isLoading, setisLoading] = useState(true)
-  const [parentName, setParentName] = useState('')
-  const [categoryId, setcategoryId] = useState('')
-  const [categoryName, setcategoryName] = useState('')
+  const [parentName, setParentName] = useState('')//显示当前子分类中的名字
+  const [categoryId, setcategoryId] = useState('')//添加或修改时传递的需要添加或者修改的id
+  const [categoryName, setcategoryName] = useState('')//添加或修改时传递的需要添加或者修改的名字
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const areas = [
-    { label: 'Beijing', value: 'Beijing' },
-    { label: 'Shanghai', value: 'Shanghai' },
-  ];
   const get = async (parentId) => {
     setisLoading(true)
     const response = await request('/manage/category/list', { parentId });
@@ -33,18 +29,22 @@ function Category() {
       message.error('获取列表失败')
     }
   }
+  //查看子分类，即修改parentId为当前分类的key，进而使用hooks自动发送请求
   const showCategory = (category) => {
     setParentId(category.key)
     setisLoading(true)
     setParentName(category.name)
   }
+  //返回一级分类列表
   const goBack = () => {
     setParentId('0')
     setisLoading(true)
     setParentName('')
   }
+  //添加或修改界面，1表示修改，2表示添加
   const showModal = (category = '') => {
     if (category) {
+      //获取需要修改的分类的id和name
       setcategoryName(category.name)
       setcategoryId(category.key)
       setIsModalVisible(1)
@@ -55,6 +55,11 @@ function Category() {
   const onChange = (e) => {
     setcategoryName(e.target.value)
   }
+  //获取当前选择的option中的key属性，即当前选择的分类的parentid
+  const onSelect = (key) => {
+    setcategoryId(key)
+  }
+  //为1表示修改，为2表示添加
   const handleOk = async () => {
     if (isModalVisible === 1) {
       const response = await request('/manage/category/update',
@@ -69,18 +74,22 @@ function Category() {
         message.error('修改失败')
       }
     } else {
-      // const response = await request('/manage/category/add',
-      //   { categoryId, categoryName }, 'post');
-      // if (response.status === 0) {
-      //   setTimeout(() => {
-      //     get(parentId)
-      //   }, 500)
-      //   message.success('添加成功')
-      //   setcategoryId('')
-      // } else {
-      //   message.error('添加失败')
-      // }
-      alert(12)
+      //categoryId为空时表示没有触发onSelect，即选择了默认option，此处为判断是否选择了默认option
+      //若为默认opytion则表示添加一级分类，parentId为0，否则parentId为所选分类的key，之后根据对应的
+      //的parentId发送请求
+      setcategoryId(categoryId ? categoryId : '0')
+      const response = await request('/manage/category/add',
+        { parentId: parentName ? parentId : categoryId, categoryName }, 'post');
+      if (response.status === 0) {
+        setTimeout(() => {
+          get(parentId)
+        }, 500)
+        message.success('添加成功')
+        setcategoryName('')
+        setcategoryId('')
+      } else {
+        message.error('添加失败')
+      }
     }
     setIsModalVisible(0);
   };
@@ -89,6 +98,7 @@ function Category() {
     setcategoryId('')
     setIsModalVisible(0);
   };
+  //监听parentID，parentID发生改变就立即发送请求获取列表
   useEffect(() => {
     setTimeout(() => {
       get(parentId)
@@ -119,6 +129,7 @@ function Category() {
     }
   ];
   return (
+    // 判断是否正在获取列表信息
     isLoading ? <div className='spin'>
       <Spin size="large" className='spin' />
     </div> :
@@ -128,7 +139,7 @@ function Category() {
             <div className='category-back'>
               <Button onClick={goBack} type="link"
                 className='category-back-btn'>一级分类列表
-            </Button><ArrowRightOutlined />{`${parentName}`}
+              </Button><ArrowRightOutlined />{`${parentName}`}
             </div>
         }
           className='category'
@@ -156,20 +167,30 @@ function Category() {
           onOk={handleOk} onCancel={handleCancel}
         >
           <Form>
-            <Form.Item>
-              <Select>
-                {
-                  category.map(item=><Option value={item.name} key={item.key}>
+            {/* 判断当前所处位置，若为分类首页，添加时显示分类选择，若在一级分类内，添加时不显示，即直接添加到该分类中 */}
+            {!parentName ?
+              <div>
+                <div className='category-span'>所属分类</div>
+                <Form.Item>
+                  <Select defaultValue="一级分类" onSelect={onSelect}>
+                    <Option key='0'>一级分类</Option>
                     {
-                      item.name
+                      category.map(item => <Option key={item.key}>
+                        {
+                          item.name
+                        }
+                      </Option>)
                     }
-                  </Option>)
-                }
-              </Select>
-            </Form.Item>
+                  </Select>
+                </Form.Item>
+              </div>
+              : ''
+            }
+            <div className='category-span'>分类名称</div>
             <Form.Item>
               <Input onChange={onChange} value={categoryName} placeholder='placeholder'></Input>
             </Form.Item>
+
           </Form>
         </Modal>
       </div>
