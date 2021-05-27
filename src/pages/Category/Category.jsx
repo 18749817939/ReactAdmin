@@ -133,7 +133,7 @@ function Category() {
     isLoading ? <div className='spin'>
       <Spin size="large" className='spin' />
     </div> :
-      <div>
+      <div className='category-container'>
         <Card title={
           parentId === '0' ? "一级分类列表" :
             <div className='category-back'>
