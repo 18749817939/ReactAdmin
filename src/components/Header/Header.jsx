@@ -8,7 +8,7 @@ import { Modal} from 'antd';
 const { confirm } = Modal;
 function Header() {
   let history = useHistory()
-  const [weather, setWeather] = useState('晴')
+  const [weather, setWeather] = useState('雷阵雨加狂风之力')
   const dateFormat = (time) => {
     if (!time) return ''
     return `${time.getFullYear()}-${time.getMonth()}-${time.getDate()}`
