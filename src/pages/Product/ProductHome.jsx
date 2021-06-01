@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import './Product.less'
-import { useHistory, Redirect ,NavLink} from 'react-router-dom'
+import { NavLink} from 'react-router-dom'
 import request from '../../api/ajax'
 import { Card, Button, Table, Spin, message, Form, Select, Input } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 const { Option } = Select;
 
 function ProductHome() {
-  let history = useHistory()
   const [products, setProducts] = useState([])//用于在子分类中展示一级分类列表
   const [isLoading, setisLoading] = useState(true)
   const [total, setTotal] = useState(0)
@@ -27,7 +26,8 @@ function ProductHome() {
         obj.status = item.status
         obj.detail = item.detail
         obj.imgs = item.imgs
-
+        obj.categoryId = item.categoryId
+        obj.pCategoryId = item.pCategoryId
         return obj
       })
       setTotal(response.data.total)
@@ -51,7 +51,6 @@ function ProductHome() {
   }
   const onSearch = async () => {
     if (searchName) {
-      // setIsSearch(true)
       if (pageNum === 1) {
         await setTimeout(() => {
           getProducts(pageNum)
@@ -79,12 +78,6 @@ function ProductHome() {
   }
   const onSelect = (key) => {
     setSearchType(key)
-  }
-  const addUpdate = ()=>{
-    history.push('/home/product/addupdate')
-  }
-  const showDetail = () =>{
-    history.push('/home/product/home')
   }
   useEffect(() => {
     setTimeout(() => {
