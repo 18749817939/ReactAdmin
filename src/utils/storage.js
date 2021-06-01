@@ -1,6 +1,6 @@
 const storage = {
-  add:(obj)=>{
-    localStorage.setItem(obj.name,JSON.stringify(obj))
+  add:(obj,name='')=>{
+    localStorage.setItem(name?name:obj.name,JSON.stringify(obj))
   },
   remove:(name)=>{
     localStorage.removeItem(name)

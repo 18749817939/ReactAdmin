@@ -4,8 +4,8 @@ import { NavLink} from 'react-router-dom'
 import request from '../../api/ajax'
 import { Card, Button, Table, Spin, message, Form, Select, Input } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
+import storage from '../../utils/storage'
 const { Option } = Select;
-
 function ProductHome() {
   const [products, setProducts] = useState([])//用于在子分类中展示一级分类列表
   const [isLoading, setisLoading] = useState(true)
@@ -79,6 +79,9 @@ function ProductHome() {
   const onSelect = (key) => {
     setSearchType(key)
   }
+  const toDetail = (product)=>{
+    storage.add(product,'product')
+  }
   useEffect(() => {
     setTimeout(() => {
       getProducts(pageNum)
@@ -109,6 +112,7 @@ function ProductHome() {
       render: (product) =>
         <div >
           <Button
+          style={{backgroundColor:'#1DA57A'}}
             type="primary" onClick={() => changeStatue(product)}
           >
             {
@@ -127,10 +131,10 @@ function ProductHome() {
       title: '操作',
       render: (product) =>
         <div>
-          <NavLink to={{pathname:'/home/product/detail',product}} className='product-link'>
+          <NavLink to='/home/product/detail' onClick={()=>toDetail(product)} className='product-link'>
             详情
           </NavLink>
-          <NavLink to={{pathname:'/home/product/addupdate',product}} className='product-link'>
+          <NavLink to='/home/product/addupdate' onClick={()=>toDetail(product)} className='product-link'>
             修改
           </NavLink>
         </div>
@@ -143,7 +147,6 @@ function ProductHome() {
     </div> :
       <div className='product-container'>
         <Card title={
-          // '12'
           <Form className='product-title'>
             <Select onSelect={onSelect} defaultValue="按名称搜索" className='product-title-item'>
               <Option key='productName'>按名称搜索</Option>

@@ -1,39 +1,32 @@
 import React, { useState, useEffect } from 'react'
 import './Product.less'
 import { useHistory, Redirect } from 'react-router-dom'
-import { Card, List, Select, Spin } from 'antd'
+import { Card, List, Spin } from 'antd'
 import { ArrowLeftOutlined,ArrowRightOutlined } from '@ant-design/icons'
 import request from '../../api/ajax'
-const { Option } = Select;
+import storage from '../../utils/storage'
 function Detail(props) {
   const [name, setName] = useState('')
   const [Cname, setCname] = useState('')
   const [loading, setLoading] = useState(false)
-
   let history = useHistory()
-  const { product } = props.location
+  const product = storage.get('product')
   const productBack = () => {
     history.replace('/home/product/home')
+    storage.remove('product')
   }
   const getInfo = async () => {
     setLoading(true)
-
     if (product.pCategoryId === '0') {
       const response = await request(`/manage/category/info`, { categoryId: product.categoryId })
       setName(response.name)
-      console.log(name)
-
     } else {
       const response1 = await request(`/manage/category/info`, { categoryId: product.categoryId })
       const response2 = await request(`/manage/category/info`, { categoryId: product.pCategoryId })
       setName(response1.data.name)
       setCname(response2.data.name)
-      console.log(response1.data.name)
-      console.log(response2.data.name)
     }
-    console.log(name)
     setLoading(false)
-
   }
   useEffect(() => {
     product ?
