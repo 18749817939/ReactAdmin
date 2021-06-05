@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import './Product.less'
-import { NavLink} from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import request from '../../api/ajax'
+import { useHistory } from 'react-router-dom'
+
 import { Card, Button, Table, Spin, message, Form, Select, Input } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import storage from '../../utils/storage'
@@ -14,6 +16,8 @@ function ProductHome() {
   const [loading, setLoading] = useState(true)
   const [searchName, setSearchName] = useState('')
   const [searchType, setSearchType] = useState('productName')
+  let history = useHistory()
+
   // const [isSearch, setIsSearch] = useState(false)
   const getMap = (response) => {
     if (response.status === 0) {
@@ -79,8 +83,12 @@ function ProductHome() {
   const onSelect = (key) => {
     setSearchType(key)
   }
-  const toDetail = (product)=>{
-    storage.add(product,'product')
+  const toDetail = (product = '') => {
+    if (product) {
+      storage.add(product, 'product')
+    } else {
+      history.push('/home/product/addupdate')
+    }
   }
   useEffect(() => {
     setTimeout(() => {
@@ -112,7 +120,7 @@ function ProductHome() {
       render: (product) =>
         <div >
           <Button
-          style={{backgroundColor:'#1DA57A'}}
+            style={{ backgroundColor: '#1DA57A' }}
             type="primary" onClick={() => changeStatue(product)}
           >
             {
@@ -131,10 +139,10 @@ function ProductHome() {
       title: '操作',
       render: (product) =>
         <div>
-          <NavLink to='/home/product/detail' onClick={()=>toDetail(product)} className='product-link'>
+          <NavLink to='/home/product/detail' onClick={() => toDetail(product)} className='product-link'>
             详情
           </NavLink>
-          <NavLink to='/home/product/addupdate' onClick={()=>toDetail(product)} className='product-link'>
+          <NavLink to='/home/product/addupdate' onClick={() => toDetail(product)} className='product-link'>
             修改
           </NavLink>
         </div>
@@ -159,7 +167,7 @@ function ProductHome() {
           </Form>
         }
           className='product'
-          extra={<Button className='add-btn' type='primary'>
+          extra={<Button className='add-btn' type='primary' onClick={() => toDetail()}>
             <PlusOutlined />添加商品
           </Button>}
         >
