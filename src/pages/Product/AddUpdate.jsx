@@ -48,6 +48,8 @@ function AddUpdate(props) {
     //   })
     //   return obj
     // }
+    //test新电脑
+
   }
   const onFinish = (values) => {
     const { productName, productDetail, productPrice, productCategory, productImgs } = values
