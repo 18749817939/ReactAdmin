@@ -12,7 +12,7 @@ function AddUpdate(props) {
   const [Cname, setCname] = useState('')
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false)
-  const product = storage.get('product')
+  const oldProduct = storage.get('product')
   const productBack = () => {
     history.replace('/home/product/home')
     storage.remove('product')
@@ -37,14 +37,10 @@ function AddUpdate(props) {
   const onFinish = (values) => {
     const { name, desc, price, categoryId, imgs } = values
     const index = categoryId.indexOf('_')
-    const productCategorys = index != -1? categoryId.split('_', 2)[1] :categoryId
-    const newProduct = {
-      name, desc, price ,
-      categoryId: productCategorys, imgs
+    const product = {
+      name, desc, price, imgs, detail: '0',pCategoryId:oldProduct.pCategoryId,categoryId:oldProduct.categoryId,_id:oldProduct.key
     }
-    // console.log(newProduct)
-    // request('/manage/product/update', product, 'POST')//product为storage中的product
-
+    request('/manage/product/update', product, 'POST')
   }
   const onChangeOptions = (value, selectedOptions) => {
     console.log(value, selectedOptions);
@@ -63,12 +59,12 @@ function AddUpdate(props) {
   };
   const getInfo = async () => {
     setLoading(true)
-    if (product.pCategoryId === '0') {
-      const response = await request(`/manage/category/info`, { categoryId: product.categoryId })
+    if (oldProduct.pCategoryId === '0') {
+      const response = await request(`/manage/category/info`, { categoryId: oldProduct.categoryId })
       setName(response.name)
     } else {
-      const response1 = await request(`/manage/category/info`, { categoryId: product.categoryId })
-      const response2 = await request(`/manage/category/info`, { categoryId: product.pCategoryId })
+      const response1 = await request(`/manage/category/info`, { categoryId: oldProduct.categoryId })
+      const response2 = await request(`/manage/category/info`, { categoryId: oldProduct.pCategoryId })
       setName(response1.data.name)
       setCname(response2.data.name)
     }
@@ -93,12 +89,12 @@ function AddUpdate(props) {
   };
   useEffect(() => {
     get('0').then(arr => setOptions(arr))
-    if (product) {
+    if (oldProduct) {
       getInfo()
     }
   }, [])
   return (
-    product ?
+    oldProduct ?
       loading ?
         <Spin size="large" className='spin' />
         : <div className='detail-container'>
@@ -123,7 +119,7 @@ function AddUpdate(props) {
                     message: 'Please input 商品名称!',
                   },
                 ]}
-                initialValue={product.name}
+                initialValue={oldProduct.name}
               >
                 <Input name="test1" style={{ width: '500px' }} />
               </Form.Item>
@@ -136,7 +132,7 @@ function AddUpdate(props) {
                     message: 'Please input 商品描述!',
                   },
                 ]}
-                initialValue={product.desc}
+                initialValue={oldProduct.desc}
 
               >
                 <TextArea rows={2} placeholder="请输入商品描述" style={{ width: '500px' }} />
@@ -150,7 +146,7 @@ function AddUpdate(props) {
                     message: 'Please input 商品价格!',
                   },
                 ]}
-                initialValue={product.price}
+                initialValue={oldProduct.price}
 
               >
                 <Input prefix="￥" suffix="RMB" style={{ width: '500px' }} />
@@ -164,20 +160,20 @@ function AddUpdate(props) {
                     message: 'Please input 商品分类!',
                   },
                 ]}
-                initialValue={[`${name}`,`${Cname}`]}
+                initialValue={[`${Cname}`, `${name}`]}
 
               >
-                <Cascader 
-                options={options} 
-                loadData={loadData} 
-                style={{ width: '500px' }} 
-                onChange={onChangeOptions} 
-                changeOnSelect 
+                <Cascader
+                  options={options}
+                  loadData={loadData}
+                  style={{ width: '500px' }}
+                  onChange={onChangeOptions}
+                  changeOnSelect
                 />
               </Form.Item>
               <Form.Item
                 label="商品图片："
-                className='addupdate-detail addupdate-detail-imgs' 
+                className='addupdate-detail addupdate-detail-imgs'
                 name="imgs"
               >
                 <Upload

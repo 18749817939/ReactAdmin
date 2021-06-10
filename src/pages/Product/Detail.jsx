@@ -61,7 +61,7 @@ function Detail(props) {
               </List.Item>
               <List.Item className='product-item-detail'>
                 所属分类：
-              <span className='detail-right'>{name}<ArrowRightOutlined />{Cname}</span>
+              <span className='detail-right'>{Cname}<ArrowRightOutlined />{name}</span>
               </List.Item>
               <List.Item className='product-item-detail'>
                 <div className='product-imgs'>
