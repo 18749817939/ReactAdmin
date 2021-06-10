@@ -10,8 +10,6 @@ function AddUpdate(props) {
   let history = useHistory()
   const [name, setName] = useState('')
   const [Cname, setCname] = useState('')
-  const [category, setCategory] = useState([])
-
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false)
   const product = storage.get('product')
@@ -19,49 +17,50 @@ function AddUpdate(props) {
     history.replace('/home/product/home')
     storage.remove('product')
   }
+  const [options, setOptions] = useState([]);
   const get = async (parentId) => {
     const response = await request('/manage/category/list', { parentId });
     if (response.status === 0) {
       const arr = response.data.map(item => {
         const obj = {}
-        obj.key = item._id
-        obj.value = item.name
+        obj.value = item._id + '_' + item.name
         obj.label = item.name
+        parentId === '0' ? obj.isLeaf = false : obj.isLeaf = true
         obj.parentId = item.parentId
         return obj
       })
       return arr
     } else {
-      message.error('获取分类失败')
+      message.error('获取列表失败')
     }
-  }
-  const getOptions = () => {
-    // const options = get(0).map(item => {
-    //   const obj = {}
-    //   obj.name = item.name
-    //   obj.value = item.name
-    //   obj.children = get(item.parentId).map(item => {
-    //     const obj = {}
-    //     obj.name = item.name
-    //     obj.value = item.name
-    //     return obj
-    //   })
-    //   return obj
-    // }
-    //test新电脑
-
   }
   const onFinish = (values) => {
-    const { productName, productDetail, productPrice, productCategory, productImgs } = values
-    console.log(values)
-    const nowProduct = {
-      productName, productDetail, productPrice, productCategory, productImgs
+    const { name, desc, price, categoryId, imgs } = values
+    const index = categoryId.indexOf('_')
+    const productCategorys = index != -1? categoryId.split('_', 2)[1] :categoryId
+    const newProduct = {
+      name, desc, price ,
+      categoryId: productCategorys, imgs
     }
-    console.log(nowProduct)
-
-
+    // console.log(newProduct)
+    request('/manage/product/update', product, 'POST')//product为storage中的product
 
   }
+  const onChangeOptions = (value, selectedOptions) => {
+    console.log(value, selectedOptions);
+  };
+  const loadData = selectedOptions => {
+    const targetOption = selectedOptions[selectedOptions.length - 1];
+    console.log(selectedOptions)
+    targetOption.loading = true
+    const key = targetOption.value.split('_', 2)[0]
+    setTimeout(async () => {
+      targetOption.loading = false;
+      await get(`${key}`).then(options => targetOption.children = options)
+      targetOption.isLeaf = true
+      setOptions([...options]);
+    }, 500);
+  };
   const getInfo = async () => {
     setLoading(true)
     if (product.pCategoryId === '0') {
@@ -78,7 +77,6 @@ function AddUpdate(props) {
   const onChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
   };
-
   const onPreview = async file => {
     let src = file.url;
     if (!src) {
@@ -93,40 +91,11 @@ function AddUpdate(props) {
     const imgWindow = window.open(src);
     imgWindow.document.write(image.outerHTML);
   };
-
-
-  const options = [
-    {
-      value: 'zhejiang',
-      label: 'Zhejiang1',
-      children: [
-        {
-          value: 'hangzhou',
-          label: 'Hangzhou',
-
-        },
-      ],
-    },
-    {
-      value: 'jiangsu',
-      label: 'Jiangsu2',
-      children: [
-        {
-          value: 'nanjing',
-          label: 'Nanjing',
-
-        },
-      ],
-    },
-  ];
-
-  const onChanges = (value) => {
-    console.log(value);
-  }
   useEffect(() => {
-    product ?
+    get('0').then(arr => setOptions(arr))
+    if (product) {
       getInfo()
-      : <Redirect to='/home/product/home'></Redirect>
+    }
   }, [])
   return (
     product ?
@@ -136,8 +105,8 @@ function AddUpdate(props) {
           <Card title={
             <span>
               <ArrowLeftOutlined onClick={productBack} style={{ color: '#1DA57A' }} />
-          &nbsp;&nbsp;添加商品
-        </span>
+                &nbsp;&nbsp;添加商品
+              </span>
           }
             className='detail'
           >
@@ -147,56 +116,69 @@ function AddUpdate(props) {
               onFinish={onFinish}>
               <Form.Item
                 label="商品名称："
-                className='addupdate-detail' name="productName"
+                className='addupdate-detail' name="name"
                 rules={[
                   {
                     required: true,
                     message: 'Please input 商品名称!',
                   },
                 ]}
+                initialValue={product.name}
               >
                 <Input name="test1" style={{ width: '500px' }} />
               </Form.Item>
               <Form.Item
                 label="商品描述："
-                className='addupdate-detail' name="productDetail"
+                className='addupdate-detail' name="desc"
                 rules={[
                   {
                     required: true,
                     message: 'Please input 商品描述!',
                   },
                 ]}
+                initialValue={product.desc}
+
               >
                 <TextArea rows={2} placeholder="请输入商品描述" style={{ width: '500px' }} />
               </Form.Item>
               <Form.Item
                 label="商品价格："
-                className='addupdate-detail' name="productPrice"
+                className='addupdate-detail' name="price"
                 rules={[
                   {
                     required: true,
                     message: 'Please input 商品价格!',
                   },
                 ]}
+                initialValue={product.price}
+
               >
                 <Input prefix="￥" suffix="RMB" style={{ width: '500px' }} />
               </Form.Item>
               <Form.Item
                 label="商品分类："
-                className='addupdate-detail' name="productCategory"
+                className='addupdate-detail' name="categoryId"
                 rules={[
                   {
                     required: true,
                     message: 'Please input 商品分类!',
                   },
                 ]}
+                initialValue={[`${name}`,`${Cname}`]}
+
               >
-                <Cascader options={options} style={{ width: '500px' }}
-                  onChange={onChanges} placeholder="Please select" />
+                <Cascader 
+                options={options} 
+                loadData={loadData} 
+                style={{ width: '500px' }} 
+                onChange={onChangeOptions} 
+                changeOnSelect 
+                />
               </Form.Item>
               <Form.Item
                 label="商品图片："
-                className='addupdate-detail addupdate-detail-imgs' name="productImgs"
+                className='addupdate-detail addupdate-detail-imgs' 
+                name="imgs"
               >
                 <Upload
                   action="/manage/img/upload"
