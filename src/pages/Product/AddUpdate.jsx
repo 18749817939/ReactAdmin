@@ -43,7 +43,7 @@ function AddUpdate(props) {
       categoryId: productCategorys, imgs
     }
     // console.log(newProduct)
-    request('/manage/product/update', product, 'POST')//product为storage中的product
+    // request('/manage/product/update', product, 'POST')//product为storage中的product
 
   }
   const onChangeOptions = (value, selectedOptions) => {
