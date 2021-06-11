@@ -8,11 +8,15 @@ import storage from '../../utils/storage'
 const { TextArea } = Input;
 function AddUpdate(props) {
   let history = useHistory()
+  const oldProduct = storage.get('product')
   const [name, setName] = useState('')
   const [Cname, setCname] = useState('')
-  const [fileList, setFileList] = useState([]);
+  const [fileList, setFileList] = useState(oldProduct.imgs.map(img=>({
+    uid:img,
+    name:img,
+    url:`http://120.55.193.14:5000/upload/${img}`
+  })));//修改时显示商品的图片信息
   const [loading, setLoading] = useState(false)
-  const oldProduct = storage.get('product')
   const productBack = () => {
     history.replace('/home/product/home')
     storage.remove('product')
@@ -34,13 +38,23 @@ function AddUpdate(props) {
       message.error('获取列表失败')
     }
   }
-  const onFinish = (values) => {
+  const onFinish = async(values) => {
+    console.log(values)
     const { name, desc, price, categoryId, imgs } = values
     const index = categoryId.indexOf('_')
     const product = {
-      name, desc, price, imgs, detail: '0',pCategoryId:oldProduct.pCategoryId,categoryId:oldProduct.categoryId,_id:oldProduct.key
+      name, desc, price, imgs:oldProduct.imgs, 
+      detail: oldProduct.detail,pCategoryId:oldProduct.pCategoryId,
+      categoryId:oldProduct.categoryId,_id:oldProduct.key
     }
-    request('/manage/product/update', product, 'POST')
+    const response = await request('/manage/product/update', product, 'POST')
+    if(response.status === 0){
+      history.replace('/home/product/home')
+      message.success('修改成功')
+    }else{
+      message.error('修改失败')
+
+    }
   }
   const onChangeOptions = (value, selectedOptions) => {
     console.log(value, selectedOptions);
@@ -175,6 +189,15 @@ function AddUpdate(props) {
                 label="商品图片："
                 className='addupdate-detail addupdate-detail-imgs'
                 name="imgs"
+                initialValue={
+                  oldProduct.imgs.map(img =>
+                    img ?
+                      <img className='product-img'
+                        key={img}
+                        src={`http://120.55.193.14:5000/upload/${img}`}
+                        alt="img" /> : ''
+                  )
+                }
               >
                 <Upload
                   action="/manage/img/upload"

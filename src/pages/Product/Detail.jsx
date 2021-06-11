@@ -29,6 +29,8 @@ function Detail(props) {
     setLoading(false)
   }
   useEffect(() => {
+    console.log(product)
+
     product ?
       getInfo()
       : <Redirect to='/home/product/home'></Redirect>
