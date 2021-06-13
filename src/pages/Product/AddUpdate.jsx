@@ -1,29 +1,29 @@
 import React, { useState, useEffect } from 'react'
 import './Product.less'
-import { useHistory, Redirect } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { Card, Form, Spin, Input, Upload, Button, Cascader, message } from 'antd'
-import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import request from '../../api/ajax'
 import storage from '../../utils/storage'
-const { TextArea } = Input;
+const { TextArea } = Input
 function AddUpdate(props) {
   let history = useHistory()
   const oldProduct = storage.get('product')
   const [name, setName] = useState('')
   const [Cname, setCname] = useState('')
-  const [fileList, setFileList] = useState(oldProduct.imgs.map(img=>({
-    uid:img,
-    name:img,
-    url:`http://120.55.193.14:5000/upload/${img}`
-  })));//修改时显示商品的图片信息
+  const [fileList, setFileList] = useState(oldProduct.imgs.map(img => ({
+    uid: img,
+    name: img,
+    url: `http://120.55.193.14:5000/upload/${img}`
+  })))
   const [loading, setLoading] = useState(false)
   const productBack = () => {
     history.replace('/home/product/home')
     storage.remove('product')
   }
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState([])
   const get = async (parentId) => {
-    const response = await request('/manage/category/list', { parentId });
+    const response = await request('/manage/category/list', { parentId })
     if (response.status === 0) {
       const arr = response.data.map(item => {
         const obj = {}
@@ -38,20 +38,29 @@ function AddUpdate(props) {
       message.error('获取列表失败')
     }
   }
-  const onFinish = async(values) => {
+  const onFinish = async (values) => {
     console.log(values)
     const { name, desc, price, categoryId, imgs } = values
+    console.log(imgs)
+    let img = []
+    if (imgs.fileList) {
+      console.log(imgs.fileList)
+      img = imgs.fileList.map(img => img.name)
+      console.log(img)
+    }
+    console.log(img)
+
     const index = categoryId.indexOf('_')
     const product = {
-      name, desc, price, imgs:oldProduct.imgs, 
-      detail: oldProduct.detail,pCategoryId:oldProduct.pCategoryId,
-      categoryId:oldProduct.categoryId,_id:oldProduct.key
+      name, desc, price, imgs: img,
+      detail: oldProduct.detail, pCategoryId: oldProduct.pCategoryId,
+      categoryId: oldProduct.categoryId, _id: oldProduct.key
     }
     const response = await request('/manage/product/update', product, 'POST')
-    if(response.status === 0){
+    if (response.status === 0) {
       history.replace('/home/product/home')
       message.success('修改成功')
-    }else{
+    } else {
       message.error('修改失败')
 
     }
@@ -115,8 +124,8 @@ function AddUpdate(props) {
           <Card title={
             <span>
               <ArrowLeftOutlined onClick={productBack} style={{ color: '#1DA57A' }} />
-                &nbsp;&nbsp;添加商品
-              </span>
+              &nbsp;&nbsp;添加商品
+            </span>
           }
             className='detail'
           >
@@ -201,7 +210,9 @@ function AddUpdate(props) {
               >
                 <Upload
                   action="/manage/img/upload"
+                  accept='image/*'
                   listType="picture-card"
+                  name='image'
                   fileList={fileList}
                   onChange={onChange}
                   onPreview={onPreview}
