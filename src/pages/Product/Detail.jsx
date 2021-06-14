@@ -15,6 +15,7 @@ function Detail(props) {
     history.replace('/home/product/home')
     storage.remove('product')
   }
+  //获取当前product的分类
   const getInfo = async () => {
     setLoading(true)
     if (product.pCategoryId === '0') {
