@@ -11,11 +11,17 @@ function AddUpdate(props) {
   const oldProduct = storage.get('product')
   const [name, setName] = useState('')
   const [Cname, setCname] = useState('')
-  const [fileList, setFileList] = useState(oldProduct.imgs.map(img => ({
+  const [fileList, setFileList] = useState(
+    oldProduct?oldProduct.imgs.map(img => ({
     uid: img,
     name: img,
     url: `http://120.55.193.14:5000/upload/${img}`
-  })))
+  })):[]
+  // [oldProduct.imgs[0],{uid: oldProduct.imgs[1],
+  //   name: oldProduct.imgs[1],
+  //   url: `http://120.55.193.14:5000/upload/${oldProduct.imgs[1]}`}]
+  //刚开始没有注意到新旧上传的图片信息不同，因此使用上述格式把两种信息的图片暴露出来以进行删除
+  )
   const [loading, setLoading] = useState(false)
   const productBack = () => {
     history.replace('/home/product/home')
@@ -39,24 +45,25 @@ function AddUpdate(props) {
     }
   }
   const onFinish = async (values) => {
-    console.log(values)
     const { name, desc, price, categoryId, imgs } = values
     console.log(imgs)
     let img = []
     if (imgs.fileList) {
       console.log(imgs.fileList)
-      img = imgs.fileList.map(img => img.name)
+      img = imgs.fileList.map(img => img.response?img.response.data.name:img.name)
+      //上传过的图片和新上传的图片的信息对象不相同，
+      //即已经上传过的图片经过上述useState中的fileList初始值处理，因此不在包含response这个信息
       console.log(img)
     }
     console.log(img)
 
     const index = categoryId.indexOf('_')
-    const product = {
+    const product = oldProduct?{
       name, desc, price, imgs: img,
       detail: oldProduct.detail, pCategoryId: oldProduct.pCategoryId,
       categoryId: oldProduct.categoryId, _id: oldProduct.key
-    }
-    const response = await request('/manage/product/update', product, 'POST')
+    }:{name, desc, price, imgs: img,}
+    const response = await request(`/manage/product/${oldProduct? 'update':'add'}`, product, 'POST')
     if (response.status === 0) {
       history.replace('/home/product/home')
       message.success('修改成功')
@@ -117,7 +124,7 @@ function AddUpdate(props) {
     }
   }, [])
   return (
-    oldProduct ?
+    // oldProduct ?
       loading ?
         <Spin size="large" className='spin' />
         : <div className='detail-container'>
@@ -142,7 +149,7 @@ function AddUpdate(props) {
                     message: 'Please input 商品名称!',
                   },
                 ]}
-                initialValue={oldProduct.name}
+                initialValue={oldProduct?oldProduct.name:''}
               >
                 <Input name="test1" style={{ width: '500px' }} />
               </Form.Item>
@@ -155,7 +162,7 @@ function AddUpdate(props) {
                     message: 'Please input 商品描述!',
                   },
                 ]}
-                initialValue={oldProduct.desc}
+                initialValue={oldProduct?oldProduct.desc:''}
 
               >
                 <TextArea rows={2} placeholder="请输入商品描述" style={{ width: '500px' }} />
@@ -169,7 +176,7 @@ function AddUpdate(props) {
                     message: 'Please input 商品价格!',
                   },
                 ]}
-                initialValue={oldProduct.price}
+                initialValue={oldProduct?oldProduct.price:''}
 
               >
                 <Input prefix="￥" suffix="RMB" style={{ width: '500px' }} />
@@ -183,7 +190,7 @@ function AddUpdate(props) {
                     message: 'Please input 商品分类!',
                   },
                 ]}
-                initialValue={[`${Cname}`, `${name}`]}
+                initialValue={oldProduct?[`${Cname}`, `${name}`]:[]}
 
               >
                 <Cascader
@@ -198,14 +205,14 @@ function AddUpdate(props) {
                 label="商品图片："
                 className='addupdate-detail addupdate-detail-imgs'
                 name="imgs"
-                initialValue={
+                initialValue={oldProduct?
                   oldProduct.imgs.map(img =>
                     img ?
                       <img className='product-img'
                         key={img}
                         src={`http://120.55.193.14:5000/upload/${img}`}
                         alt="img" /> : ''
-                  )
+                  ):null
                 }
               >
                 <Upload
@@ -229,7 +236,7 @@ function AddUpdate(props) {
             </Form>
           </Card>
         </div>
-      : <div>meiyou</div>
+      // : <div>meiyou</div>
   )
 }
 
