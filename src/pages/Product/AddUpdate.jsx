@@ -46,30 +46,27 @@ function AddUpdate(props) {
   }
   const onFinish = async (values) => {
     const { name, desc, price, categoryId, imgs } = values
-    console.log(imgs)
+    console.log(categoryId)
     let img = []
     if (imgs.fileList) {
-      console.log(imgs.fileList)
       img = imgs.fileList.map(img => img.response?img.response.data.name:img.name)
       //上传过的图片和新上传的图片的信息对象不相同，
       //即已经上传过的图片经过上述useState中的fileList初始值处理，因此不在包含response这个信息
-      console.log(img)
     }
-    console.log(img)
+    const index0 = categoryId[0].split('_', 2)[0]
+    const index1 = categoryId[1].split('_', 2)[0]
 
-    const index = categoryId.indexOf('_')
     const product = oldProduct?{
       name, desc, price, imgs: img,
       detail: oldProduct.detail, pCategoryId: oldProduct.pCategoryId,
       categoryId: oldProduct.categoryId, _id: oldProduct.key
-    }:{name, desc, price, imgs: img,}
+    }:{name, desc, price, imgs: img,pCategoryId:index0,categoryId: index1}
     const response = await request(`/manage/product/${oldProduct? 'update':'add'}`, product, 'POST')
     if (response.status === 0) {
       history.replace('/home/product/home')
       message.success('修改成功')
     } else {
       message.error('修改失败')
-
     }
   }
   const onChangeOptions = (value, selectedOptions) => {
@@ -226,7 +223,13 @@ function AddUpdate(props) {
                 >
                   {fileList.length < 5 && '+上传图片'}
                 </Upload>
-
+              </Form.Item>
+              <Form.Item
+                label="商品详情："
+                className='addupdate-detail addupdate-detail-imgs' name="detail"
+                initialValue={oldProduct?oldProduct.detail:''}
+              >
+                <TextArea rows={2} placeholder="请输入商品详情" style={{ width: '500px' }} />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit">
