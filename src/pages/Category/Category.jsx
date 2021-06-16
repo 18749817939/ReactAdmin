@@ -150,7 +150,8 @@ function Category() {
           <Table
             bordered className='table'
             dataSource={category} columns={columns}
-            pagination={{ defaultPageSize: 3 }}
+            pagination={{ defaultPageSize: 3 ,showSizeChanger:false}}
+            
           />
 
         </Card>

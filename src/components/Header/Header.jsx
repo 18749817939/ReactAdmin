@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import storage from '../../utils/storage'
 import './Header.less'
+import getTime from '../../utils/getTime'
 import { useHistory } from 'react-router-dom'
 import request from '../../api/ajax'
 import { FrownOutlined,ExclamationCircleOutlined } from '@ant-design/icons'
@@ -9,13 +10,13 @@ const { confirm } = Modal;
 function Header() {
   let history = useHistory()
   const [weather, setWeather] = useState('雷阵雨加狂风之力')
-  const dateFormat = (time) => {
-    if (!time) return ''
-    return `${time.getFullYear()}-${time.getMonth()}-${time.getDate()}`
-      + " " +
-      `${time.getHours()}:${time.getMinutes()>=10?time.getMinutes():'0'+time.getMinutes()}:${time.getSeconds()>=10?time.getSeconds():'0'+time.getSeconds()}`
-  }
-  const [time, setTime] = useState(dateFormat(new Date()))
+  // const dateFormat = (time) => {
+  //   if (!time) return ''
+  //   return `${time.getFullYear()}-${time.getMonth()+1}-${time.getDate()}`
+  //     + " " +
+  //     `${time.getHours()}:${time.getMinutes()>=10?time.getMinutes():'0'+time.getMinutes()}:${time.getSeconds()>=10?time.getSeconds():'0'+time.getSeconds()}`
+  // }
+  const [time, setTime] = useState(getTime(new Date()))
   const loginOut = () => {
     confirm({
       title: '确定退出吗?',
@@ -37,7 +38,7 @@ function Header() {
   }
   useEffect(() => {
     const timer =  setInterval(() => {
-      setTime(dateFormat(new Date()))
+      setTime(getTime(new Date()))
     }, 1000)
     getWeather()
     return ()=>{

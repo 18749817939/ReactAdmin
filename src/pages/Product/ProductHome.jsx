@@ -177,7 +177,8 @@ function ProductHome() {
             pagination={{
               total, defaultPageSize: 3,
               onChange: (pageNum) => setPageNum(pageNum),
-              defaultCurrent: pageNum
+              defaultCurrent: pageNum,
+              showSizeChanger:false
             }}
             loading={loading}
           />
