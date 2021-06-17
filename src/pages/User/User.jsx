@@ -4,7 +4,7 @@ import getTime from '../../utils/getTime'
 import { NavLink } from 'react-router-dom'
 import request from '../../api/ajax'
 import { useHistory } from 'react-router-dom'
-import { Card, Button, Table, Spin, message } from 'antd'
+import { Card, Button, Table, Spin, message, Modal, Form, Input } from 'antd'
 // import { PlusOutlined } from '@ant-design/icons'
 import storage from '../../utils/storage'
 function User() {
@@ -13,6 +13,8 @@ function User() {
   const [total, setTotal] = useState(0)
   const [pageNum, setPageNum] = useState(1)
   const [roles, setRoles] = useState({})
+  const [isModalVisible, setIsModalVisible] = useState(0);
+
   let history = useHistory()
   const getMap = (response) => {
     if (response.status === 0) {
@@ -34,14 +36,32 @@ function User() {
     }
   }
   const getUsers = async () => {
-    const response = await request(`/manage/user/list?&pageSize=3`)
+    const response = await request(`/manage/user/list`)
     const { roles, users } = response.data
-    const roleNames = roles.reduce((pre, role) => {
-      pre[role._id] = role.name ? role.name : ""
-      return pre
-    }, [])
-    setRoles(roleNames)
-    getMap(response)
+    if (response.status === 0) {
+      const roleNames = roles.reduce((pre, role) => {
+        pre[role._id] = role.name ? role.name : ""
+        return pre
+      }, [])
+      setRoles(roleNames)
+      getMap(response)
+    } else {
+      message.error("获取角色列表失败")
+      // request("http://120.55.193.14:5000/manage/user/" + (user._id ? 'update' : 'add'), user, "POST")
+    }
+  }
+  const alterUser = () => {
+    setIsModalVisible(2)
+  }
+  const addUser = () => {
+    setIsModalVisible(1)
+  }
+  const handleOk = () => {
+    setIsModalVisible(0)
+
+  }
+  const handleCancel = () => {
+    setIsModalVisible(0)
   }
   useEffect(() => {
     setTimeout(() => {
@@ -84,9 +104,9 @@ function User() {
       width: '19%',
       title: '操作',
       render: (user) =>
-        <div>
-          <Button type='link' >详情</Button>
-          <Button type='link' >修改</Button>
+        <div >
+          <Button className='user-link' type='link' >修改</Button>
+          <Button className='user-link' onClick={alterUser} type='link' >删除</Button>
         </div>
     },
   ];
@@ -96,7 +116,7 @@ function User() {
     </div> :
       <div className='user-container'>
         <Card title={
-          <Button type='primary' >创建用户</Button>
+          <Button type='primary' onClick={addUser}>创建用户</Button>
         }
           className='user'
         >
@@ -111,6 +131,72 @@ function User() {
             }}
           />
         </Card>
+        <Modal title="创建用户" visible={isModalVisible != 0 ? true : false}
+          onOk={handleOk} onCancel={handleCancel}
+        >
+          <Form labelCol={{span:4}}>
+            <Form.Item
+              label="用户名："
+              className='addupdate-detail' name="name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input 用户名!',
+                },
+              ]}
+            >
+              <Input name="test1" style={{ width: '230px' }} placeholder="请输入用户名" />
+            </Form.Item>
+            <Form.Item
+              label="密码："
+              className='addupdate-detail' name="name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input 密码!',
+                },
+              ]}
+            >
+              <Input name="test1" style={{ width: '230px' }} placeholder="请输入密码" />
+            </Form.Item>
+            <Form.Item
+              label="手机号："
+              className='addupdate-detail' name="name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input 手机号!',
+                },
+              ]}
+            >
+              <Input name="test1" style={{ width: '230px' }} placeholder="请输入手机号" />
+            </Form.Item>
+            <Form.Item
+              label="邮箱："
+              className='addupdate-detail' name="name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input 邮箱!',
+                },
+              ]}
+            >
+              <Input name="test1" style={{ width: '230px' }} placeholder="请输入邮箱" />
+            </Form.Item>
+            <Form.Item
+              label="角色："
+              className='addupdate-detail' name="name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input 角色!',
+                },
+              ]}
+            >
+              <Input name="test1" style={{ width: '230px' }} placeholder="请输入角色" />
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
   )
 }
