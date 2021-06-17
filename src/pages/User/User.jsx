@@ -8,11 +8,11 @@ import { Card, Button, Table, Spin, message } from 'antd'
 // import { PlusOutlined } from '@ant-design/icons'
 import storage from '../../utils/storage'
 function User() {
-  const [products, setProducts] = useState([])//用于在子分类中展示一级分类列表
-  const [isLoading, setisLoading] = useState(true)
+  const [users, setUsers] = useState([])
+  const [isLoading, setisLoading] = useState(true)//判断是否获取到hooks中的请求数据
   const [total, setTotal] = useState(0)
   const [pageNum, setPageNum] = useState(1)
-  const [loading, setLoading] = useState(true)
+  const [roles, setRoles] = useState({})
   let history = useHistory()
   const getMap = (response) => {
     if (response.status === 0) {
@@ -23,32 +23,29 @@ function User() {
         obj.email = item.email
         obj.phone = item.phone
         obj.creatTime = getTime(new Date(item.create_time))
-        obj.role = item.role_id
+        obj.role_id = item.role_id
         return obj
       })
       setTotal(response.data.total)
-      setProducts(arr)
+      setUsers(arr)
       setisLoading(false)
-      setLoading(false)
     } else {
       message.error('获取列表失败')
     }
   }
-  const getProducts = async () => {
-    setLoading(true)
-    const response = await request(`/manage/user/list?&pageSize=3`);
+  const getUsers = async () => {
+    const response = await request(`/manage/user/list?&pageSize=3`)
+    const { roles, users } = response.data
+    const roleNames = roles.reduce((pre, role) => {
+      pre[role._id] = role.name ? role.name : ""
+      return pre
+    }, [])
+    setRoles(roleNames)
     getMap(response)
-  }
-  const toDetail = (product = '') => {
-    if (product) {
-      storage.add(product, 'product')
-    } else {
-      history.push('/home/product/addupdate')
-    }
   }
   useEffect(() => {
     setTimeout(() => {
-      getProducts()
+      getUsers()
     }, 500)
   }, [])
   const columns = [
@@ -79,49 +76,42 @@ function User() {
     {
       width: '14%',
       title: '所属角色',
-      dataIndex: 'role',
-      key: 'role',
+      dataIndex: 'role_id',//用于和数据数组中的每一项属性进行绑定
+      render: role_id => roles[role_id]
+
     },
     {
       width: '19%',
       title: '操作',
-      render: (product) =>
+      render: (user) =>
         <div>
-          <NavLink to='/home/product/detail' onClick={() => toDetail(product)} className='product-link'>
-            详情
-          </NavLink>
-          <NavLink to='/home/product/addupdate' onClick={() => toDetail(product)} className='product-link'>
-            修改
-          </NavLink>
+          <Button type='link' >详情</Button>
+          <Button type='link' >修改</Button>
         </div>
     },
   ];
-
   return (
     isLoading ? <div className='spin'>
       <Spin size="large" className='spin' />
     </div> :
-      <div className='product-container'>
+      <div className='user-container'>
         <Card title={
-            <Button type='primary' >创建用户</Button>
+          <Button type='primary' >创建用户</Button>
         }
-          className='product'
+          className='user'
         >
           <Table
             bordered className='table'
-            dataSource={products} columns={columns}
+            dataSource={users} columns={columns}
             pagination={{
               total, defaultPageSize: 3,
               onChange: (pageNum) => setPageNum(pageNum),
               defaultCurrent: pageNum,
-              showSizeChanger:false
+              showSizeChanger: false
             }}
-            loading={loading}
           />
         </Card>
       </div>
   )
 }
-
-
 export default User;
