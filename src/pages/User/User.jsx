@@ -14,8 +14,8 @@ function User() {
   const [pageNum, setPageNum] = useState(1)
   const [roles, setRoles] = useState({})
   const [isModalVisible, setIsModalVisible] = useState(0);
-
   let history = useHistory()
+  const {form} = Form.useForm
   const getMap = (response) => {
     if (response.status === 0) {
       const arr = response.data.users.map(item => {
@@ -50,13 +50,20 @@ function User() {
       // request("http://120.55.193.14:5000/manage/user/" + (user._id ? 'update' : 'add'), user, "POST")
     }
   }
-  const alterUser = () => {
+  const onFinish = values=>{
+    console.log(values)
+    form.resetFields()
+    setIsModalVisible(0)
+
+  }
+  const alterUser = user => {
     setIsModalVisible(2)
   }
   const addUser = () => {
     setIsModalVisible(1)
   }
   const handleOk = () => {
+    // onFinish()
     setIsModalVisible(0)
 
   }
@@ -105,8 +112,8 @@ function User() {
       title: '操作',
       render: (user) =>
         <div >
-          <Button className='user-link' type='link' >修改</Button>
-          <Button className='user-link' onClick={alterUser} type='link' >删除</Button>
+          <Button className='user-link' onClick={()=>alterUser(user)} type='link' >修改</Button>
+          <Button className='user-link'  type='link' >删除</Button>
         </div>
     },
   ];
@@ -132,12 +139,12 @@ function User() {
           />
         </Card>
         <Modal title="创建用户" visible={isModalVisible != 0 ? true : false}
-          onOk={handleOk} onCancel={handleCancel}
+          onOk={handleOk} onCancel={handleCancel} footer={null}
         >
-          <Form labelCol={{span:4}}>
+          <Form labelCol={{span:4}} onFinish={onFinish}>
             <Form.Item
               label="用户名："
-              className='addupdate-detail' name="name"
+              className='user-username' name="username"
               rules={[
                 {
                   required: true,
@@ -145,11 +152,11 @@ function User() {
                 },
               ]}
             >
-              <Input name="test1" style={{ width: '230px' }} placeholder="请输入用户名" />
+              <Input  style={{ width: '230px' }} placeholder="请输入用户名" />
             </Form.Item>
             <Form.Item
               label="密码："
-              className='addupdate-detail' name="name"
+              className='user-password' name="password"
               rules={[
                 {
                   required: true,
@@ -161,7 +168,7 @@ function User() {
             </Form.Item>
             <Form.Item
               label="手机号："
-              className='addupdate-detail' name="name"
+              className='user-phone' name="phone"
               rules={[
                 {
                   required: true,
@@ -173,7 +180,7 @@ function User() {
             </Form.Item>
             <Form.Item
               label="邮箱："
-              className='addupdate-detail' name="name"
+              className='user-email' name="email"
               rules={[
                 {
                   required: true,
@@ -185,7 +192,7 @@ function User() {
             </Form.Item>
             <Form.Item
               label="角色："
-              className='addupdate-detail' name="name"
+              className='user-role' name="role"
               rules={[
                 {
                   required: true,
@@ -194,6 +201,9 @@ function User() {
               ]}
             >
               <Input name="test1" style={{ width: '230px' }} placeholder="请输入角色" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">确认</Button>
             </Form.Item>
           </Form>
         </Modal>
