@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import './User.less'
 import getTime from '../../utils/getTime'
-import { NavLink } from 'react-router-dom'
 import request from '../../api/ajax'
-import { useHistory } from 'react-router-dom'
 import { Card, Button, Table, Spin, message, Modal, Form, Input, Select } from 'antd'
 // import { PlusOutlined } from '@ant-design/icons'
-import storage from '../../utils/storage'
 const { Option } = Select;
 function User() {
   const [users, setUsers] = useState([])
@@ -16,7 +13,7 @@ function User() {
   const [roles, setRoles] = useState({})
   const [options, setOptions] = useState([])
   const [isModalVisible, setIsModalVisible] = useState(0);
-  let history = useHistory()
+  const [modalUser, setModalUser] = useState()
   const [form] = Form.useForm()
   const getMap = (response) => {
     if (response.status === 0) {
@@ -41,7 +38,7 @@ function User() {
   const getUsers = async () => {
     setisLoading(true)
     const response = await request(`/manage/user/list`)
-    const { roles, users } = response.data
+    const { roles } = response.data
     if (response.status === 0) {
       const roleNames = roles.reduce((pre, role) => {
         pre[role._id] = role.name ? role.name : ""
@@ -59,9 +56,9 @@ function User() {
   const onFinish = async (values) => {
     console.log(values)
     const creat_time = Date.now()
-    const user = { ...values, creat_time }
+    const user = { ...values, creat_time }//这里没有creat_time属性也可以请求成功，可能是因为后台自动创建了一个时间
     console.log(user)
-    const response = await request('http://120.55.193.14:5000/manage/user/add', values, "POST")
+    const response = await request(`/manage/user/${isModalVisible === 1 ? 'add' : 'update'}`, user, "POST")
     if (response.status === 0) {
       setTimeout(() => {
         getUsers()
@@ -72,15 +69,21 @@ function User() {
     form.resetFields()
     setIsModalVisible(0)
   }
-  const alterUser = user => {
-    console.log(user)
-    setIsModalVisible(2)
-  }
-  const addUser = () => {
+  const showModal = (user = '') => {
+    if (user) {
+      console.log(user)
+      setModalUser(user.username)
+      setIsModalVisible(2)
+    }else{
     setIsModalVisible(1)
+
+    }
   }
   const handleCancel = () => {
     setIsModalVisible(0)
+  }
+  const onChange = (e) => {
+    setModalUser(e.target.value)
   }
   useEffect(() => {
     setTimeout(() => {
@@ -124,7 +127,7 @@ function User() {
       title: '操作',
       render: (user) =>
         <div >
-          <Button className='user-link' onClick={() => alterUser(user)} type='link' >修改</Button>
+          <Button className='user-link' onClick={() => showModal(user)} type='link' >修改</Button>
           <Button className='user-link' type='link' >删除</Button>
         </div>
     },
@@ -135,7 +138,7 @@ function User() {
     </div> :
       <div className='user-container'>
         <Card title={
-          <Button type='primary' onClick={addUser}>创建用户</Button>
+          <Button type='primary' onClick={() => showModal()}>创建用户</Button>
         }
           className='user'
         >
@@ -163,9 +166,12 @@ function User() {
                   message: 'Please input 用户名!',
                 },
               ]}
-              initialValue=''
+            // initialValue={modalUser.username}
             >
-              <Input style={{ width: '230px' }} placeholder="请输入用户名" />
+
+              <Input onChange={onChange} value={modalUser} style={{ width: '230px' }} placeholder='请输入用户名' />
+              <Input onChange={onChange} value={modalUser} style={{ width: '230px' }} placeholder='请输入用户名' />
+            
             </Form.Item>
             {
               isModalVisible === 1 ? <Form.Item
@@ -184,6 +190,8 @@ function User() {
             <Form.Item
               label="手机号："
               className='user-phone' name="phone"
+            // initialValue={isModalVisible===2?storage.get('modalUser').phone:''}
+
             >
               <Input name="test1" style={{ width: '230px' }} placeholder="请输入手机号" />
             </Form.Item>
