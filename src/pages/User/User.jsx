@@ -41,7 +41,7 @@ function User() {
     const { roles } = response.data
     if (response.status === 0) {
       const roleNames = roles.reduce((pre, role) => {
-        pre[role._id] = role.name ? role.name : ""
+        pre[role._id] = role.name ? role.name : ""//这里使用了每个id作为对象的属性名，因为每个id都是唯一的，因此使用[]
         return pre
       }, [])
       const options = roles.map(role => ({ _id: role._id, name: role.name }))
@@ -63,17 +63,19 @@ function User() {
     } else {
       message.error(`${user_id ? `修改失败` : `添加失败:${response.msg}`}`)
     }
-    form.resetFields()
+    form.resetFields()//每次都清楚form表单中的数据
     setUser_id()
     setIsModalVisible(0)
   }
   const showModal = (user = '') => {
     if (user) {
       setUser_id(user.key)
+      //From下的Item以及各个Input等表单数据在命名name属性后就会变为受控组件，进而不能使用ini以及default
+      //等初始值属性动态设置默认值，只能使用form下的一些方法，比如setFieldsValue
       form.setFieldsValue({ 'username': user.username, 'phone': user.phone, 'email': user.email, 'role_id': roles[user.role_id] })
       setIsModalVisible(2)
     } else {
-      setIsModalVisible(1)
+      setIsModalVisible(1)//1表示添加，2表示修改
     }
   }
   const handleCancel = () => {
@@ -85,7 +87,7 @@ function User() {
     Modal.confirm({
       title: '删除吗？？？？',
       onOk: async () => {
-        const response = await request('http://120.55.193.14:5000/manage/user/delete', { userId: user.key }, 'post')
+        const response = await request('/manage/user/delete', { userId: user.key }, 'post')
         if (response.status === 0) {
           message.success(`删除成功`)
           setTimeout(() => {
@@ -160,7 +162,7 @@ function User() {
               total, defaultPageSize: 3,
               onChange: (pageNum) => setPageNum(pageNum),
               defaultCurrent: pageNum,
-              showSizeChanger: false
+              showSizeChanger: false//去掉底部的每页显示数量的选择器
             }}
           />
         </Card>
@@ -215,6 +217,7 @@ function User() {
                 placeholder="请选择角色"
               >
                 {
+                  // 会自动获取key和value，没有value时会自动获取key，因此使用key即可作为表单收集的value
                   options.map(item => <Option key={item._id}>
                     {
                       item.name
