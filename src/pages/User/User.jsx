@@ -13,7 +13,7 @@ function User() {
   const [roles, setRoles] = useState({})
   const [options, setOptions] = useState([])
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const [modalUser, setModalUser] = useState()
+  const [user_id, setUser_id] = useState()//修改时用的id
   const [form] = Form.useForm()
   const getMap = (response) => {
     if (response.status === 0) {
@@ -50,40 +50,52 @@ function User() {
       getMap(response)
     } else {
       message.error("获取角色列表失败")
-      // request('http://120.55.193.14:5000/manage/user/add'), user, "POST")
     }
   }
   const onFinish = async (values) => {
-    console.log(values)
     const creat_time = Date.now()
-    const user = { ...values, creat_time }//这里没有creat_time属性也可以请求成功，可能是因为后台自动创建了一个时间
-    console.log(user)
+    const user = user_id ? { ...values, _id: user_id } : { ...values, creat_time }//这里没有creat_time属性也可以请求成功，可能是因为后台自动创建了一个时间
     const response = await request(`/manage/user/${isModalVisible === 1 ? 'add' : 'update'}`, user, "POST")
     if (response.status === 0) {
       setTimeout(() => {
         getUsers()
       }, 500)
     } else {
-      message.error(`'添加失败`)
+      message.error(`${user_id ? `修改失败` : `添加失败:${response.msg}`}`)
     }
     form.resetFields()
+    setUser_id()
     setIsModalVisible(0)
   }
   const showModal = (user = '') => {
     if (user) {
-      console.log(user)
-      setModalUser(user.username)
+      setUser_id(user.key)
+      form.setFieldsValue({ 'username': user.username, 'phone': user.phone, 'email': user.email, 'role_id': roles[user.role_id] })
       setIsModalVisible(2)
-    }else{
-    setIsModalVisible(1)
-
+    } else {
+      setIsModalVisible(1)
     }
   }
   const handleCancel = () => {
+    setUser_id()
+    form.resetFields()
     setIsModalVisible(0)
   }
-  const onChange = (e) => {
-    setModalUser(e.target.value)
+  const deleteUser = (user) => {
+    Modal.confirm({
+      title: '删除吗？？？？',
+      onOk: async () => {
+        const response =await request('http://120.55.193.14:5000/manage/user/delete', { userId: user.key }, 'post')
+        if (response.status === 0) {
+          message.success(`删除成功`)
+          setTimeout(() => {
+            getUsers()
+          }, 200)
+        } else {
+          message.error(`删除失败`)
+        }
+      }
+    })
   }
   useEffect(() => {
     setTimeout(() => {
@@ -120,7 +132,6 @@ function User() {
       title: '所属角色',
       dataIndex: 'role_id',//用于和数据数组中的每一项属性进行绑定
       render: role_id => roles[role_id]
-
     },
     {
       width: '19%',
@@ -128,7 +139,7 @@ function User() {
       render: (user) =>
         <div >
           <Button className='user-link' onClick={() => showModal(user)} type='link' >修改</Button>
-          <Button className='user-link' type='link' >删除</Button>
+          <Button className='user-link' onClick={() => deleteUser(user)} type='link' >删除</Button>
         </div>
     },
   ];
@@ -159,19 +170,16 @@ function User() {
           <Form labelCol={{ span: 4 }} onFinish={onFinish} form={form}>
             <Form.Item
               label="用户名："
-              className='user-username' name="username"
+              className='user-username'
+              name="username"
               rules={[
                 {
                   required: true,
                   message: 'Please input 用户名!',
                 },
               ]}
-            // initialValue={modalUser.username}
             >
-
-              <Input onChange={onChange} value={modalUser} style={{ width: '230px' }} placeholder='请输入用户名' />
-              <Input onChange={onChange} value={modalUser} style={{ width: '230px' }} placeholder='请输入用户名' />
-            
+              <Input style={{ width: '230px' }} placeholder='请输入用户名'></Input>
             </Form.Item>
             {
               isModalVisible === 1 ? <Form.Item
@@ -190,8 +198,6 @@ function User() {
             <Form.Item
               label="手机号："
               className='user-phone' name="phone"
-            // initialValue={isModalVisible===2?storage.get('modalUser').phone:''}
-
             >
               <Input name="test1" style={{ width: '230px' }} placeholder="请输入手机号" />
             </Form.Item>
