@@ -85,7 +85,7 @@ function User() {
     Modal.confirm({
       title: '删除吗？？？？',
       onOk: async () => {
-        const response =await request('http://120.55.193.14:5000/manage/user/delete', { userId: user.key }, 'post')
+        const response = await request('http://120.55.193.14:5000/manage/user/delete', { userId: user.key }, 'post')
         if (response.status === 0) {
           message.success(`删除成功`)
           setTimeout(() => {
@@ -224,8 +224,10 @@ function User() {
               </Select>
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit"  >确认</Button>
-              <Button type="primary" htmlType="button" onClick={handleCancel} >取消</Button>
+              <div className='user-btns'>
+                <Button className='ok-btn' type="primary" htmlType="submit" >确认</Button>
+                <Button className='no-btn' type="primary" htmlType="button" onClick={handleCancel} >取消</Button>
+              </div>
             </Form.Item>
           </Form>
         </Modal>
