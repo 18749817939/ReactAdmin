@@ -9,7 +9,8 @@ function Login(props) {
   let history = useHistory()
   const onFinish = async (values) => {
     const { username, password } = values
-    const response = await request('/login', { username, password }, "POST")
+    // const response = await request('/login', { username, password }, "POST")
+    const response = await request('http://159.75.128.32:5000/api/user/login', { name:username, password }, "POST")
     if (response.status === 0) {
       const user = { ...values, name: 'user' }
       storage.add(user)
@@ -38,7 +39,7 @@ function Login(props) {
               name="username"
               rules={[
                 { required: true, message: '请输入用户名！' },
-                { min: 4, message: '用户名长度不得小于4！' },
+                { min: 3, message: '用户名长度不得小于3！' },
                 { max: 12, message: '用户名长度不得超过12！' },
                 { pattern: /^[\w]+$/, message: '用户名只能包含任意数字、字母、下划线！' }
               ]}
@@ -49,7 +50,7 @@ function Login(props) {
               name="password"
               rules={[
                 { required: true, message: '请输入密码！' },
-                { min: 4, message: '密码长度不得小于4！' },
+                { min: 3, message: '密码长度不得小于3！' },
                 { max: 12, message: '密码长度不得超过12！' },
                 { pattern: /^[\w]+$/, message: '密码只能包含任意数字、字母、下划线！' }
               ]}
