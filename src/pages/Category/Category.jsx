@@ -14,11 +14,13 @@ function Category() {
   const [isModalVisible, setIsModalVisible] = useState(0);
   const get = async (parentId) => {
     setisLoading(true)
-    const response = await request('/manage/category/list', { parentId });
+    // const response = await request('/manage/category/list', { parentId });
+    const response = await request(`http://159.75.128.32:5000/api/category/list/${parentId}`);
     if (response.status === 0) {
       const arr = response.data.map(item => {
         const obj = {}
-        obj.key = item._id
+        // obj.key = item._id
+        obj.key = item.id
         obj.name = item.name
         obj.parentId = item.parentId
         return obj
@@ -62,8 +64,10 @@ function Category() {
   //为1表示修改，为2表示添加
   const handleOk = async () => {
     if (isModalVisible === 1) {
-      const response = await request('/manage/category/update',
-        { categoryId, categoryName }, 'post');
+      // const response = await request('/manage/category/update',
+      //   { categoryId, categoryName }, 'post');
+      const response = await request('http://159.75.128.32:5000/api/category/update',
+        { id: categoryId, name: categoryName }, 'PUT');
       if (response.status === 0) {
         setTimeout(() => {
           get(parentId)
@@ -78,8 +82,11 @@ function Category() {
       //若为默认opytion则表示添加一级分类，parentId为0，否则parentId为所选分类的key，之后根据对应的
       //的parentId发送请求
       setcategoryId(categoryId ? categoryId : '0')
-      const response = await request('/manage/category/add',
-        { parentId: parentName ? parentId : categoryId, categoryName }, 'post');
+      // const response = await request('/manage/category/add',
+      //   { parentId: parentName ? parentId : categoryId, categoryName }, 'post');
+      const response = await request('http://159.75.128.32:5000/api/category/add',
+        { parentId: parentName ? parentId : categoryId ? categoryId : '0', name: categoryName }, 'post');
+        //当没有触发select时，parentId应为默认值'0'，没有使用hook初始化categoryId为'0'，而是直接在后面又进行了判断
       if (response.status === 0) {
         setTimeout(() => {
           get(parentId)
@@ -123,7 +130,7 @@ function Category() {
             parentId === '0' ?
               <Button onClick={() => showCategory(category)}
                 type="link" className='category-btn'>查看子分类
-            </Button> : ''
+              </Button> : ''
           }
         </span>
     }
@@ -150,8 +157,8 @@ function Category() {
           <Table
             bordered className='table'
             dataSource={category} columns={columns}
-            pagination={{ defaultPageSize: 3 ,showSizeChanger:false}}
-            
+            pagination={{ defaultPageSize: 4, showSizeChanger: false }}
+
           />
 
         </Card>

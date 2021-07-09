@@ -8,7 +8,9 @@ const ajax = (url, data = {}, type = 'GET') => {
       promise = axios.get(url, {
         params: data
       })
-    } else {
+    } else if(type === 'PUT'){
+      promise = axios.put(url, data)
+    }else {
       promise = axios.post(url, data)
     }
     promise.then(response=>{
