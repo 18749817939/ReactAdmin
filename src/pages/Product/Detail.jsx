@@ -79,7 +79,7 @@ function Detail(props) {
                       img ?
                         <img className='product-img'
                           key={img}
-                          src={`http://120.55.193.14:5000/upload/${img}`}
+                          src={`http://120.55.193.14:5000/files/${img}`}
                           alt="img" /> : ''
                     ) : ''
                   }

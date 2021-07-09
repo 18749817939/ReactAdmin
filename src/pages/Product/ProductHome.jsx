@@ -33,7 +33,7 @@ function ProductHome() {
         obj.status = item.status
         obj.detail = item.detail
         // obj.imgs = item.imgs
-        obj.imgs = item.images
+        obj.imgs = item.images?item.images.split(','):item.images
         obj.categoryId = item.categoryId
         // obj.pCategoryId = item.pCategoryId
         obj.pCategoryId = item.pcategoryId
