@@ -33,7 +33,7 @@ function ProductHome() {
         obj.status = item.status
         obj.detail = item.detail
         // obj.imgs = item.imgs
-        obj.imgs = item.images?item.images.split(','):item.images
+        obj.imgs = item.images ? item.images.split(',') : item.images
         obj.categoryId = item.categoryId
         // obj.pCategoryId = item.pCategoryId
         obj.pCategoryId = item.pcategoryId
@@ -52,8 +52,14 @@ function ProductHome() {
     setLoading(true)
     let response
     if (searchName) {
-      response = await request('/manage/product/search',
-        { pageNum, pageSize: 3, [searchType]: searchName })
+      // response = await request('/manage/product/search',
+      //   { pageNum, pageSize: 3, [searchType]: searchName })
+      if (searchType === 'productName') {
+        response = await request('http://159.75.128.32:5000/api/products/searchByName',
+          { pageNum, pageSize: 3, name: searchName })
+      }else{
+        response = await request(`http://159.75.128.32:5000/api/products/searchByDesc/${searchName}/${pageNum}/3`)
+      }
     } else {
       // response = await request(`/manage/product/list?pageNum=${pageNum}&pageSize=3`);
       response = await request(`http://159.75.128.32:5000/api/products/list`, { pageNum, pageSize: 3 }, 'POST');
