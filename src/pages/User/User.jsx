@@ -16,41 +16,50 @@ function User() {
   const [user_id, setUser_id] = useState()//修改时用的id
   const [form] = Form.useForm()
   const getMap = (response) => {
-    if (response.status === 0) {
-      const arr = response.data.users.map(item => {
-        const obj = {}
-        obj.key = item._id
-        obj.username = item.username
-        obj.email = item.email
-        obj.phone = item.phone
-        obj.creatTime = getTime(new Date(item.create_time))
-        obj.role_id = item.role_id
-        return obj
-      })
-      setTotal(response.data.total)
-      setUsers(arr)
-      setisLoading(false)
-    } else {
-      message.error('获取列表失败')
-    }
+    // if (response.status === 0) {
+    // const arr = response.data.users.map(item => {//没有status
+    const arr = response.map(item => {
+      const obj = {}
+      // obj.key = item._id
+      // obj.username = item.username
+      // obj.role_id = item.role_id
+      // obj.creatTime = getTime(new Date(item.create_time))
+      obj.key = item.id
+      obj.username = item.name
+      obj.email = item.email
+      obj.phone = item.phone
+      obj.creatTime = item.createTime
+      obj.role_id = item.roleId
+      return obj
+    })
+    // setTotal(response.data.total)
+    setTotal(response.length)
+    setUsers(arr)
+    setisLoading(false)
+    // } else {
+    //   message.error('获取列表失败')
+    // }
   }
   //获取列表并对格式进行处理存放在hooks中供后期使用
   const getUsers = async () => {
     setisLoading(true)
-    const response = await request(`/manage/user/list`)
-    const { roles } = response.data
-    if (response.status === 0) {
-      const roleNames = roles.reduce((pre, role) => {
-        pre[role._id] = role.name ? role.name : ""//这里使用了每个id作为对象的属性名，因为每个id都是唯一的，因此使用[]
-        return pre
-      }, [])
-      const options = roles.map(role => ({ _id: role._id, name: role.name }))
-      setOptions(options)
-      setRoles(roleNames)
-      getMap(response)
-    } else {
-      message.error("获取角色列表失败")
-    }
+    // const response = await request(`/manage/user/list`)
+    const response = await request(`http://159.75.128.32:5000/api/user/getUsers`)
+    const roles = response
+    // const { roles } = response.data
+    // if (response.status === 0) {
+    const roleNames = roles.reduce((pre, role) => {
+      // pre[role._id] = role.name ? role.name : ""//这里使用了每个id作为对象的属性名，因为每个id都是唯一的，因此使用[]
+      pre[role.id] = role.name ? role.name : ""
+      return pre
+    }, [])
+    const options = roles.map(role => ({ _id: role._id, name: role.name }))
+    setOptions(options)
+    setRoles(roleNames)
+    getMap(response)
+    // } else {
+    //   message.error("获取角色列表失败")
+    // }
   }
   const onFinish = async (values) => {
     const creat_time = Date.now()
