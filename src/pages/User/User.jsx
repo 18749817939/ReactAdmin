@@ -53,7 +53,8 @@ function User() {
       pre[role.id] = role.name ? role.name : ""
       return pre
     }, [])
-    const options = roles.map(role => ({ _id: role._id, name: role.name }))
+    // const options = roles.map(role => ({ _id: role._id, name: role.name }))
+    const options = roles.map(role => ({ _id: role.id, name: role.name }))
     setOptions(options)
     setRoles(roleNames)
     getMap(response)
@@ -62,10 +63,18 @@ function User() {
     // }
   }
   const onFinish = async (values) => {
+    // const creat_time = Date.now()
+    // const user = user_id ? { ...values, _id: user_id } : { ...values, creat_time }//这里没有creat_time属性也可以请求成功，可能是因为后台自动创建了一个时间
+    // const response = await request(`/manage/user/${isModalVisible === 1 ? 'add' : 'update'}`, user, "POST")
+    console.log(values)
+    const value = { name: values.username, email: values.email, phone: values.phone, roleId: values.role_id }
     const creat_time = Date.now()
-    const user = user_id ? { ...values, _id: user_id } : { ...values, creat_time }//这里没有creat_time属性也可以请求成功，可能是因为后台自动创建了一个时间
-    const response = await request(`/manage/user/${isModalVisible === 1 ? 'add' : 'update'}`, user, "POST")
-    if (response.status === 0) {
+    const user = user_id ? { ...value, id: user_id } : { ...value, password: values.password }
+    const response = await request(`http://159.75.128.32:5000/api/user/${isModalVisible === 1 ? 'add' : `update/${user_id}`}`,
+      user, isModalVisible === 1 ?'post':'PUT')
+    // if (response.status === 0) {
+    if (response === 'success') {
+      message.success(`添加成功`)
       setTimeout(() => {
         getUsers()
       }, 500)
@@ -96,8 +105,10 @@ function User() {
     Modal.confirm({
       title: '删除吗？？？？',
       onOk: async () => {
-        const response = await request('/manage/user/delete', { userId: user.key }, 'post')
-        if (response.status === 0) {
+        const response = await request(`http://159.75.128.32:5000/api/user/delete/${user.key}`, {}, 'DELETE')
+        // const response = await request('/manage/user/delete', { userId: user.key }, 'post')
+        // if (response.status === 0) {
+        if (response) {
           message.success(`删除成功`)
           setTimeout(() => {
             getUsers()

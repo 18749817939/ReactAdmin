@@ -1,7 +1,7 @@
 // 统一处理请求异常
 import axios from 'axios'
 import {message} from 'antd'
-const ajax = (url, data = {}, type = 'GET') => {
+const request = (url, data = {}, type = 'GET') => {
   return new Promise((resolve,reject)=>{
     let promise
     if (type === 'GET') {
@@ -10,6 +10,8 @@ const ajax = (url, data = {}, type = 'GET') => {
       })
     } else if(type === 'PUT'){
       promise = axios.put(url, data)
+    }else if(type === 'DELETE'){
+      promise = axios.delete(url)
     }else {
       promise = axios.post(url, data)
     }
@@ -20,4 +22,4 @@ const ajax = (url, data = {}, type = 'GET') => {
     })
   })
 }
-export default ajax;
+export default request;
