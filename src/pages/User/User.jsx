@@ -81,7 +81,7 @@ function User() {
     } else {
       message.error(`${user_id ? `修改失败` : `添加失败:${response.msg}`}`)
     }
-    form.resetFields()//每次都清楚form表单中的数据
+    form.resetFields()//每次都清除form表单中的数据
     setUser_id()
     setIsModalVisible(0)
   }

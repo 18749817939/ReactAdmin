@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Button, Table, Spin, message, Modal, Form, Input, Select, Radio } from 'antd'
+import { Card, Button, Table, Spin, message, Modal, Form, Input, Select, Radio, Tree } from 'antd'
 import request from '../../api/ajax'
 import './Role.less'
+const { TreeNode } = Tree;
 function Role() {
   const [isLoading, setisLoading] = useState(true)//判断是否获取到hooks中的请求数据
   const [roles, setRoles] = useState()
   const [pageNum, setPageNum] = useState(1)
   const [total, setTotal] = useState()
   const [value, setValue] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(0)
+  const [roleName, setRoleName] = useState()
+  const [treeSelect, setTreeSelect] = useState('')
   const getMap = (response) => {
     const arr = response.map(item => {
       const role = {}
@@ -34,6 +38,25 @@ function Role() {
   const onChange = e => {
     console.log('radio checked', e.target.value);
     setValue(e.target.value);
+  };
+  const createRole = () => {
+    setIsModalVisible(1)
+  }
+  const modifyRole = () => {
+    setIsModalVisible(2)
+  }
+  const handleCancel = () => {
+    setIsModalVisible(0)
+    setRoleName();
+  }
+  const handleOk = () => {
+    alert(roleName)
+    // 创建角色接口
+    setIsModalVisible(0)
+    setRoleName();
+  }
+  const roleNameChange = e => {
+    setRoleName(e.target.value);
   };
   const columns = [
     {
@@ -69,6 +92,64 @@ function Role() {
       key: 'authName'
     },
   ]
+  const treeData = [
+    {
+      title: '平台权限',
+      key: 'work',
+      children: [
+        {
+          title: '首页',
+          key: 'home',
+        },
+        {
+          title: '商品',
+          key: 'goods',
+          children: [
+            {
+              title: '品类管理',
+              key: 'category',
+            },
+            {
+              title: '商品管理',
+              key: 'product',
+            },
+          ],
+        },
+        {
+          title: '用户管理',
+          key: 'user',
+        },
+        {
+          title: '角色管理',
+          key: 'role',
+        },
+        {
+          title: '图形图表',
+          key: 'chart',
+          children: [
+            {
+              title: '柱形图',
+              key: 'chartCircle',
+            },
+            {
+              title: '折线图',
+              key: 'chartLine',
+            },
+            {
+              title: '饼图',
+              key: 'chartPillar',
+            },
+          ],
+        },
+      ],
+    },
+  ];
+  const onSelect = (selectedKeys, info) => {
+    console.log('selected', selectedKeys, info);
+  };
+  const onCheck = (checkedKeys, info) => {
+    console.log('onCheck', checkedKeys, info);
+  };
   useEffect(() => {
     setTimeout(() => {
       getRoles()
@@ -82,8 +163,8 @@ function Role() {
         <Card
           title={
             <span className='role-btns'>
-              <Button type='primary' style={{ marginRight: '8px' }}>创建角色</Button>
-              <Button type='primary' disabled={!value}>设置角色权限</Button>
+              <Button type='primary' onClick={createRole} style={{ marginRight: '8px' }}>创建角色</Button>
+              <Button type='primary' onClick={modifyRole} disabled={!value}>设置角色权限</Button>
             </span>
           }
           className='role'
@@ -101,6 +182,25 @@ function Role() {
             }}
           />
         </Card>
+        <Modal title="创建用户" visible={isModalVisible === 1 ? true : false}
+          onCancel={handleCancel} onOk={handleOk}
+        >
+          <span>
+            角色名称：<Input value={roleName} onChange={roleNameChange} style={{ width: '230px' }} placeholder='请输入角色名称'></Input>
+          </span>
+        </Modal>
+        <Modal title="修改用户" visible={isModalVisible === 2 ? true : false}
+          onCancel={handleCancel} onOk={handleOk}
+        >
+          <Tree
+            checkable
+            onSelect={onSelect}
+            onCheck={onCheck}
+            treeData={treeData}
+            expandedKeys={['work','goods','chart']}
+            autoExpandParent={true}
+          />
+        </Modal>
       </div>
   )
 }
