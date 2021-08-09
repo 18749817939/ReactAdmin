@@ -3,6 +3,7 @@ import './User.less'
 import getTime from '../../utils/getTime'
 import request from '../../api/ajax'
 import { Card, Button, Table, Spin, message, Modal, Form, Input, Select } from 'antd'
+import storage from '../../utils/storage'
 // import { PlusOutlined } from '@ant-design/icons'
 const { Option } = Select;
 function User() {
@@ -15,6 +16,7 @@ function User() {
   const [isModalVisible, setIsModalVisible] = useState(0);
   const [user_id, setUser_id] = useState()//修改时用的id
   const [form] = Form.useForm()
+  const getId = storage.get('user').username
   const getMap = (response) => {
     // if (response.status === 0) {
     // const arr = response.data.users.map(item => {//没有status
@@ -32,6 +34,11 @@ function User() {
       obj.role_id = item.roleId
       return obj
     })
+    // //查找当前登录的用户对应的role_id，并存在localStorage中，这里默认所有的用户名都是唯一的，但这里实际上不是，因此查找时默认为找的第一个
+    // const id = arr.find(item => 
+    //   item.username === getId
+    // )
+    // storage.remove('role_id')
     // setTotal(response.data.total)
     setTotal(response.length)
     setUsers(arr)
@@ -45,7 +52,8 @@ function User() {
     setisLoading(true)
     // const response = await request(`/manage/user/list`)
     const response = await request(`http://159.75.128.32:5000/api/user/getUsers`)
-    const roles = response
+    const responseRole = await request('http://159.75.128.32:5000/api/role/getRoles')
+    const roles = responseRole.data
     // const { roles } = response.data
     // if (response.status === 0) {
     const roleNames = roles.reduce((pre, role) => {

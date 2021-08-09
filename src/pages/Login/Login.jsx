@@ -10,9 +10,22 @@ function Login(props) {
   const onFinish = async (values) => {
     const { username, password } = values
     // const response = await request('/login', { username, password }, "POST")
-    const response = await request('http://159.75.128.32:5000/api/user/login', { name:username, password }, "POST")
+    const response = await request('http://159.75.128.32:5000/api/user/login', { name: username, password }, "POST")
     if (response.status === 0) {
-      const user = { ...values, name: 'user' }
+      const response = await request(`http://159.75.128.32:5000/api/user/getUsers`)
+      const arr = response.map(item => {
+        const obj = {}
+        obj.key = item.id
+        obj.username = item.name
+        obj.role_id = item.roleId
+        return obj
+      })
+      const role = arr.find(item =>
+        item.username === values.username
+      )
+      const responseRole = await request(`http://159.75.128.32:5000/api/role/get/${role.role_id}`)
+      const roles = {authName:responseRole.authName,menus:responseRole.menus.split(','),id:responseRole.id}
+      const user = { ...values, ...roles,name: 'user' }
       storage.add(user)
       history.push('/home')
       message.success('登陆成功')
@@ -65,7 +78,7 @@ function Login(props) {
             <Form.Item>
               <Button type="primary" htmlType="submit" className="login-form-button">
                 登录
-            </Button>
+              </Button>
             </Form.Item>
           </Form>
         </div>
