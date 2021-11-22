@@ -42,6 +42,7 @@ function AddUpdate(props) {
         obj.label = item.name
         parentId === '0' ? obj.isLeaf = false : obj.isLeaf = true
         obj.parentId = item.parentId
+        // console.log(obj.value)
         return obj
       })
       return arr
@@ -51,15 +52,16 @@ function AddUpdate(props) {
   }
   const onFinish = async (values) => {
     const { name, desc, price, categoryId, imgs } = values
-    console.log(categoryId)
+    console.log(imgs)
     let img = []
-    if (imgs.fileList) {
-      img = imgs.fileList.map(img => img.response ? img.response.data.name : img.name)
+    // if (imgs.fileList) {
+    //   img = imgs.fileList.map(img => img.response ? img.response.data.name : img.name)
       //fileList中包括已经上传过的图片和新上传的图片，上传过的图片和新上传的图片的信息对象不相同，
       //即已经上传过的图片经过上述useState中的fileList初始值处理，因此不再包含response这个信息，所以分两种方式进行处理
-    }
+    // }
     const index0 = categoryId[0].split('_', 2)[0]
     const index1 = categoryId[1].split('_', 2)[0]
+    // console.log(index0)
     //针对修改和添加显示传递不同的参数，因为添加不需要传递_id
     const product = oldProduct ? {
       // name, desc, price, imgs: img,
@@ -67,9 +69,9 @@ function AddUpdate(props) {
       // categoryId: oldProduct.categoryId, _id: oldProduct.key
       // } : { name, desc, price, imgs: img, pCategoryId: index0, categoryId: index1 }
       // const response = await request(`/manage/product/${oldProduct? 'update':'add'}`, product, 'POST')
-      name, desc, price, images: 'img',
-      detail: oldProduct.detail, pcategoryId: oldProduct.pCategoryId,
-      categoryId: oldProduct.categoryId, id: oldProduct.key
+      name:name, desc:desc, price:price, images: img,
+      detail: oldProduct.detail, pcategoryId: isNaN(index1)?oldProduct.pcategoryId:index1,
+      categoryId: isNaN(index0)?oldProduct.categoryId:index0, id: oldProduct.key
     } : { name, desc, price, images: `12`, pcategoryId: index0, categoryId: index1 }
     const response = await request(`http://159.75.128.32:5000/api/products/${oldProduct ? 'updateProduct' : 'addProduct'}${oldProduct ? `/${oldProduct.key}` : ''}`,
       product, `${oldProduct ? 'PUT' : 'POST'}`)
@@ -102,7 +104,7 @@ function AddUpdate(props) {
     // if (oldProduct.pCategoryId === '0') {
     // const response = await request(`/ manage / category / info`, { categoryId: oldProduct.categoryId })
     if (oldProduct.pcategoryId === '0') {
-      const response = await request(`http://159.75.128.32:5000/api/products/findById/${oldProduct.categoryId}`)
+      const response = await request(`http://159.75.128.32:5000/api/products/findById/${oldProduct.key}`)
 
       setName(response.name)
     } else {
@@ -110,8 +112,8 @@ function AddUpdate(props) {
       // const response2 = await request(`/manage/category/info`, { categoryId: oldProduct.pCategoryId })
       // setName(response1.data.name)
       // setCname(response2.data.name)
-      const response1 = await request(`http://159.75.128.32:5000/api/products/findById/${oldProduct.categoryId}`)
-      const response2 = await request(`http://159.75.128.32:5000/api/products/findById/${oldProduct.pCategoryId}`)
+      const response1 = await request(`http://159.75.128.32:5000/api/products/findById/${oldProduct.key}`)
+      const response2 = await request(`http://159.75.128.32:5000/api/category/findCategoryById/${oldProduct.categoryId}`)
       setName(response1.name)//没有使用data包裹数据
       setCname(response2.name)//没有使用data包裹数据
     }
@@ -237,7 +239,7 @@ function AddUpdate(props) {
               <Upload
                 // action="/manage/img/upload"
                 action='http://159.75.128.32:5000/uploadFile'
-                accept='image/*'
+                // accept='image/*'
                 listType="picture-card"
                 name='image'
                 fileList={fileList}

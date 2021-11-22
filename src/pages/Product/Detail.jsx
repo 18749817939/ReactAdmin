@@ -18,17 +18,17 @@ function Detail(props) {
   //获取当前product的分类
   const getInfo = async () => {
     setLoading(true)
-    if (product.pCategoryId === '0') {
+    if (product.categoryId === '0') {
       // const response = await request(`/manage/category/info`, { categoryId: product.categoryId })
-      const response = await request(`http://159.75.128.32:5000/api/products/findById/${product.categoryId}`)
+      const response = await request(`http://159.75.128.32:5000/api/products/findById/${product.key}`)
       setName(response.name)
     } else {
       // const response1 = await request(`/manage/category/info`, { categoryId: product.categoryId })
       // const response2 = await request(`/manage/category/info`, { categoryId: product.pCategoryId })
       // setName(response1.data.name)
       // setCname(response2.data.name)
-      const response1 = await request(`http://159.75.128.32:5000/api/products/findById/${product.categoryId}`)
-      const response2 = await request(`http://159.75.128.32:5000/api/products/findById/${product.pCategoryId}`)
+      const response1 = await request(`http://159.75.128.32:5000/api/products/findById/${product.key}`)
+      const response2 = await request(`http://159.75.128.32:5000/api/category/findCategoryById/${product.categoryId}`)
       setName(response1.name)//没有使用data包裹数据
       setCname(response2.name)//没有使用data包裹数据
     }
