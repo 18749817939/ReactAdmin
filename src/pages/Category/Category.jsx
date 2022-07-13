@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import './Category.less'
 import { Card, Button, Select, Table, Spin, message, Modal, Input, Form } from 'antd';
-import request from '../../api/ajax'
+import {request,requestUrl} from '../../api/ajax'
 import { PlusOutlined, ArrowRightOutlined } from '@ant-design/icons'
 const { Option } = Select;
 function Category() {
   const [category, setCategory] = useState([])//用于在子分类中展示一级分类列表
-  const [parentId, setParentId] = useState('0')//发送请求的ID
+  const [parentId, setParentId] = useState(0)//发送请求的ID
   const [isLoading, setisLoading] = useState(true)
   const [parentName, setParentName] = useState('')//显示当前子分类中的名字
-  const [categoryId, setcategoryId] = useState('')//添加或修改时传递的需要添加或者修改的id
+  const [categoryId, setcategoryId] = useState()//添加或修改时传递的需要添加或者修改的id
   const [categoryName, setcategoryName] = useState('')//添加或修改时传递的需要添加或者修改的名字
   const [isModalVisible, setIsModalVisible] = useState(0);
   const get = async (parentId) => {
     setisLoading(true)
-    // const response = await request('/manage/category/list', { parentId });
-    const response = await request(`http://159.75.128.32:5000/api/category/list/${parentId}`);
-    if (response.status === 0) {
+    const response = await request(`${requestUrl}/category/get/${parentId}`);
+    if (response.success) {
       const arr = response.data.map(item => {
         const obj = {}
-        // obj.key = item._id
         obj.key = item.id
         obj.name = item.name
         obj.parentId = item.parentId
@@ -39,9 +37,9 @@ function Category() {
   }
   //返回一级分类列表
   const goBack = () => {
-    setParentId('0')
-    setisLoading(true)
-    setParentName('')
+      setParentId(0)
+      setisLoading(true)
+      setParentName('')
   }
   //添加或修改界面，1表示修改，2表示添加
   const showModal = (category = '') => {
@@ -64,11 +62,8 @@ function Category() {
   //为1表示修改，为2表示添加
   const handleOk = async () => {
     if (isModalVisible === 1) {
-      // const response = await request('/manage/category/update',
-      //   { categoryId, categoryName }, 'post');
-      const response = await request('http://159.75.128.32:5000/api/category/update',
-        { id: categoryId, name: categoryName }, 'PUT');
-      if (response.status === 0) {
+      const response = await request(`${requestUrl}/category/update`,{ id: categoryId, name: categoryName }, 'PUT');
+      if (response.success) {
         setTimeout(() => {
           get(parentId)
         }, 500)
@@ -81,13 +76,11 @@ function Category() {
       //categoryId为空时表示没有触发onSelect，即选择了默认option，此处为判断是否选择了默认option
       //若为默认opytion则表示添加一级分类，parentId为0，否则parentId为所选分类的key，之后根据对应的
       //的parentId发送请求
-      setcategoryId(categoryId ? categoryId : '0')
-      // const response = await request('/manage/category/add',
-      //   { parentId: parentName ? parentId : categoryId, categoryName }, 'post');
-      const response = await request('http://159.75.128.32:5000/api/category/add',
-        { parentId: parentName ? parentId : categoryId ? categoryId : '0', name: categoryName }, 'post');
-        //当没有触发select时，parentId应为默认值'0'，没有使用hook初始化categoryId为'0'，而是直接在后面又进行了判断
-      if (response.status === 0) {
+      setcategoryId(categoryId ? categoryId : 0)
+      const response = await request(`${requestUrl}/category/add`,
+        { parentId: parentName ? parentId : categoryId ? categoryId : 0, name: categoryName }, 'POST');
+      //当没有触发select时，parentId应为默认值'0'，没有使用hook初始化categoryId为'0'，而是直接在后面又进行了判断
+      if (response.success) {
         setTimeout(() => {
           get(parentId)
         }, 500)
@@ -127,7 +120,7 @@ function Category() {
             type="link" className='category-btn'>修改分类
           </Button>
           {
-            parentId === '0' ?
+            parentId === 0 ?
               <Button onClick={() => showCategory(category)}
                 type="link" className='category-btn'>查看子分类
               </Button> : ''
@@ -142,9 +135,9 @@ function Category() {
     </div> :
       <div className='category-container'>
         <Card title={
-          parentId === '0' ? "一级分类列表" :
+          parentId === 0 ? "一级分类列表" :
             <div className='category-back'>
-              <Button onClick={goBack} type="link"
+              <Button onClick={goBack} type="link" 
                 className='category-back-btn'>一级分类列表
               </Button><ArrowRightOutlined />{`${parentName}`}
             </div>

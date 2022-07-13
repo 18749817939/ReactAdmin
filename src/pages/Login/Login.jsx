@@ -3,35 +3,30 @@ import { useHistory, Redirect } from 'react-router-dom'
 import './Login.less'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { Form, Input, Button, message } from 'antd'
-import request from '../../api/ajax'
+import { request ,requestUrl} from '../../api/ajax'
 import storage from '../../utils/storage'
 function Login(props) {
   let history = useHistory()
   const onFinish = async (values) => {
     const { username, password } = values
-    // const response = await request('/login', { username, password }, "POST")
-    const response = await request('http://159.75.128.32:5000/api/user/login', { name: username, password }, "POST")
-    if (response.status === 0) {
-      const response = await request(`http://159.75.128.32:5000/api/user/getUsers`)
-      const arr = response.map(item => {
-        const obj = {}
-        obj.key = item.id
-        obj.username = item.name
-        obj.role_id = item.roleId
-        return obj
-      })
-      const role = arr.find(item =>
-        item.username === values.username
-      )
-      const responseRole = await request(`http://159.75.128.32:5000/api/role/get/${role.role_id}`)
-      const roles = {authName:responseRole.authName,menus:responseRole.menus.split(','),id:responseRole.id}
-      const user = { ...values, ...roles,name: 'user' }
-      storage.add(user)
+    const response = await request(`${requestUrl}/user/getUserByName`, { user: username, pwd: password }, "POST")
+    if (response.success) {
+      const user = response.data
+      storage.add(user, 'user')
       history.push('/home')
       message.success('登陆成功')
     } else {
       message.error(response.msg)
     }
+
+  }
+  const click = () => {
+    const user = {
+      id: -1,
+      role: 0
+    }
+    storage.add(user, 'user')
+    history.push('/home')
   }
   return (
     !storage.get('user') ?
@@ -78,6 +73,9 @@ function Login(props) {
             <Form.Item>
               <Button type="primary" htmlType="submit" className="login-form-button">
                 登录
+              </Button>
+              <Button type='primary' onClick={click} className="visite-form-button">
+                免登录访问
               </Button>
             </Form.Item>
           </Form>

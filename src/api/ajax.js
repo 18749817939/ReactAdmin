@@ -1,7 +1,7 @@
 // 统一处理请求异常
 import axios from 'axios'
 import {message} from 'antd'
-const request = (url, data = {}, type = 'GET') => {
+export const request = (url, data = {}, type = 'GET') => {
   return new Promise((resolve,reject)=>{
     let promise
     if (type === 'GET') {
@@ -22,4 +22,4 @@ const request = (url, data = {}, type = 'GET') => {
     })
   })
 }
-export default request;
+export const requestUrl = `http://123.56.75.70:3008/admin`

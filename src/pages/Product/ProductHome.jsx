@@ -1,45 +1,38 @@
 import React, { useState, useEffect } from 'react'
 import './Product.less'
 import { NavLink } from 'react-router-dom'
-import request from '../../api/ajax'
+import { request ,requestUrl} from '../../api/ajax'
+
 import { useHistory } from 'react-router-dom'
 
 import { Card, Button, Table, Spin, message, Form, Select, Input } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import storage from '../../utils/storage'
 const { Option } = Select;
 function ProductHome() {
   const [products, setProducts] = useState([])//用于在子分类中展示一级分类列表
   const [isLoading, setisLoading] = useState(true)
   const [total, setTotal] = useState(0)
   const [pageNum, setPageNum] = useState(1)
+  const [pageSize, setPageSize] = useState(3)
   const [loading, setLoading] = useState(true)
   const [searchName, setSearchName] = useState('')
   const [searchType, setSearchType] = useState('productName')
   let history = useHistory()
-
-  // const [isSearch, setIsSearch] = useState(false)
   const getMap = (response) => {
-    // if (response.status === 0) {
-    if (response.list) {//此处没有status，只能通过是否获取到list判断
-      // const arr = response.data.list.map(item => {
-      const arr = response.list.map(item => {//此处也没有h在使用data包裹整个数据，数据直接存在response中
+    if (response.success) {
+      const arr = response.data.map(item => {//此处也没有h在使用data包裹整个数据，数据直接存在response中
         const obj = {}
-        // obj.key = item._id
         obj.key = item.id
         obj.name = item.name
         obj.desc = item.desc
         obj.price = item.price
         obj.status = item.status
         obj.detail = item.detail
-        // obj.imgs = item.imgs
-        obj.imgs = item.images ? item.images.split(',') : item.images
+        obj.imgs = item.imgs
         obj.categoryId = item.categoryId
-        // obj.pCategoryId = item.pCategoryId
-        obj.pCategoryId = item.pcategoryId
+        obj.pCategoryId = item.pCategoryId
         return obj
       })
-      // setTotal(response.data.total)
       setTotal(response.total)//此处也没有h在使用data包裹整个数据，数据直接存在response中
       setProducts(arr)
       setisLoading(false)
@@ -52,17 +45,13 @@ function ProductHome() {
     setLoading(true)
     let response
     if (searchName) {
-      // response = await request('/manage/product/search',
-      //   { pageNum, pageSize: 3, [searchType]: searchName })
       if (searchType === 'productName') {
-        response = await request('http://159.75.128.32:5000/api/products/searchByName',
-          { pageNum, pageSize: 3, name: searchName })
-      }else{
-        response = await request(`http://159.75.128.32:5000/api/products/searchByDesc/${searchName}/${pageNum}/3`)
+        response = await request(`${requestUrl}/product/searchByName/${searchName}/${pageNum}/3`)
+      } else {
+        response = await request(`${requestUrl}/product/searchByDesc/${searchName}/${pageNum}/3`)
       }
     } else {
-      // response = await request(`/manage/product/list?pageNum=${pageNum}&pageSize=3`);
-      response = await request(`http://159.75.128.32:5000/api/products/list`, { pageNum, pageSize: 3 }, 'POST');
+      response = await request(`${requestUrl}/product/get/${pageSize}/${pageNum}`);
     }
     getMap(response)
   }
@@ -80,12 +69,9 @@ function ProductHome() {
     }
   }
   const changeStatue = async (product) => {
-    // const response = await request('/manage/product/updateStatus',
-    //   { productId: product.key, status: product.status === 1 ? 2 : 1 }, 'post')
-    const response = await request(`http://159.75.128.32:5000/api/products/updateStatus/${product.key}`,
-      { status: product.status === 1 ? 2 : 1 }, 'PUT')
-    // if (response.status === 0) {
-    if (response) {//没有状态码
+    const response = await request(`${requestUrl}/product/changeStatus/${product.key}`,
+      { status: product.status === 1 ? 0 : 1 }, 'PUT')
+    if (response.success) {//没有状态码
       setTimeout(() => {
         getProducts(pageNum)
       }, 500)
@@ -99,12 +85,8 @@ function ProductHome() {
   const onSelect = (key) => {
     setSearchType(key)
   }
-  const toDetail = (product = '') => {
-    if (product) {
-      storage.add(product, 'product')
-    } else {
+  const addupdata = () => {
       history.push('/home/product/addupdate')
-    }
   }
   useEffect(() => {
     setTimeout(() => {
@@ -155,10 +137,10 @@ function ProductHome() {
       title: '操作',
       render: (product) =>
         <div>
-          <NavLink to='/home/product/detail' onClick={() => toDetail(product)} className='product-link'>
+          <NavLink to={{pathname:'/home/product/detail',state:product}} className='product-link'>
             详情
           </NavLink>
-          <NavLink to='/home/product/addupdate' onClick={() => toDetail(product)} className='product-link'>
+          <NavLink to={{pathname:'/home/product/addupdate',state:product}} className='product-link'>
             修改
           </NavLink>
         </div>
@@ -183,7 +165,7 @@ function ProductHome() {
           </Form>
         }
           className='product'
-          extra={<Button className='add-btn' type='primary' onClick={() => toDetail()}>
+          extra={<Button className='add-btn' type='primary' onClick={() => addupdata()}>
             <PlusOutlined />添加商品
           </Button>}
         >

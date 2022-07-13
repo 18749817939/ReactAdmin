@@ -3,12 +3,8 @@ import {
   QrcodeOutlined,
   UserOutlined,
   SafetyOutlined,
-  AreaChartOutlined,
   UnorderedListOutlined,
   ToolOutlined,
-  BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
 } from '@ant-design/icons';
 export const menuList = [
   {
@@ -43,26 +39,26 @@ export const menuList = [
     key: '/home/role',
     icon: <SafetyOutlined />
   },
-  {
-    title: '图形图标',
-    key: '图形图标',
-    icon: <AreaChartOutlined />,
-    children: [
-      {
-        title: '柱形图',
-        key: '/home/chartpillar',
-        icon: <BarChartOutlined />
-      },
-      {
-        title: '折线图',
-        key: '/home/chartline',
-        icon: <LineChartOutlined />
-      },
-      {
-        title: '饼图',
-        key: '/home/chartcircle',
-        icon: <PieChartOutlined />
-      }
-    ]
-  },
+  // {
+  //   title: '图形图标',
+  //   key: '图形图标',
+  //   icon: <AreaChartOutlined />,
+  //   children: [
+  //     {
+  //       title: '柱形图',
+  //       key: '/home/chartpillar',
+  //       icon: <BarChartOutlined />
+  //     },
+  //     {
+  //       title: '折线图',
+  //       key: '/home/chartline',
+  //       icon: <LineChartOutlined />
+  //     },
+  //     {
+  //       title: '饼图',
+  //       key: '/home/chartcircle',
+  //       icon: <PieChartOutlined />
+  //     }
+  //   ]
+  // },
 ]

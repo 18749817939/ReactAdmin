@@ -1,42 +1,29 @@
 import React, { useState, useEffect } from 'react'
 import './Product.less'
-import { useHistory, Redirect } from 'react-router-dom'
+import { useHistory, Redirect, useLocation } from 'react-router-dom'
 import { Card, List, Spin } from 'antd'
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons'
-import request from '../../api/ajax'
-import storage from '../../utils/storage'
+import { request, requestUrl } from '../../api/ajax'
+
 function Detail(props) {
   const [name, setName] = useState('')
-  const [Cname, setCname] = useState('')
+  const [pname, setpname] = useState('')
   const [loading, setLoading] = useState(false)
   let history = useHistory()
-  const product = storage.get('product')
+  let location = useLocation()
+  const product = location.state
   const productBack = () => {
     history.replace('/home/product/home')
-    storage.remove('product')
   }
   //获取当前product的分类
   const getInfo = async () => {
     setLoading(true)
-    if (product.categoryId === '0') {
-      // const response = await request(`/manage/category/info`, { categoryId: product.categoryId })
-      const response = await request(`http://159.75.128.32:5000/api/products/findById/${product.key}`)
-      setName(response.name)
-    } else {
-      // const response1 = await request(`/manage/category/info`, { categoryId: product.categoryId })
-      // const response2 = await request(`/manage/category/info`, { categoryId: product.pCategoryId })
-      // setName(response1.data.name)
-      // setCname(response2.data.name)
-      const response1 = await request(`http://159.75.128.32:5000/api/products/findById/${product.key}`)
-      const response2 = await request(`http://159.75.128.32:5000/api/category/findCategoryById/${product.categoryId}`)
-      setName(response1.name)//没有使用data包裹数据
-      setCname(response2.name)//没有使用data包裹数据
-    }
+    const response = await request(`${requestUrl}/category/getById/${product.categoryId}`)
+    setName(response.name)
+    setpname(response.pname)
     setLoading(false)
   }
   useEffect(() => {
-    console.log(product)
-
     product ?
       getInfo()
       : <Redirect to='/home/product/home'></Redirect>
@@ -69,19 +56,18 @@ function Detail(props) {
               </List.Item>
               <List.Item className='product-item-detail'>
                 所属分类：
-                <span className='detail-right'>{Cname}<ArrowRightOutlined />{name}</span>
+                <span className='detail-right'>{pname}{pname ? <ArrowRightOutlined /> : ''}{name}</span>
               </List.Item>
               <List.Item className='product-item-detail'>
                 <div className='product-imgs'>
                   <div>商品图片：</div>
                   {
-                    product.imgs ? product.imgs.map(img =>
-                      img ?
-                        <img className='product-img'
-                          key={img}
-                          src={`http://120.55.193.14:5000/files/${img}`}
-                          alt="img" /> : ''
-                    ) : ''
+                    product.imgs.map(img =>
+                      <img className='product-img'
+                        key={img}
+                        src={`http://123.56.75.70/upload/${img}`}
+                        alt="img" />
+                    )
                   }
                 </div>
               </List.Item>

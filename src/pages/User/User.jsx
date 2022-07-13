@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import './User.less'
 import getTime from '../../utils/getTime'
-import request from '../../api/ajax'
+import {request,requestUrl} from '../../api/ajax'
+
 import { Card, Button, Table, Spin, message, Modal, Form, Input, Select } from 'antd'
 import storage from '../../utils/storage'
-// import { PlusOutlined } from '@ant-design/icons'
 const { Option } = Select;
 function User() {
   const [users, setUsers] = useState([])
@@ -14,24 +14,18 @@ function User() {
   const [roles, setRoles] = useState({})
   const [options, setOptions] = useState([])
   const [isModalVisible, setIsModalVisible] = useState(0);
-  const [user_id, setUser_id] = useState()//修改时用的id
+  const [roleId,setRoleId] = useState()
+  const [user_id, setUser_id] = useState(storage.get('user').id)//修改时用的id
   const [form] = Form.useForm()
-  const getId = storage.get('user').username
-  const getMap = (response) => {
-    // if (response.status === 0) {
-    // const arr = response.data.users.map(item => {//没有status
-    const arr = response.map(item => {
+  const getMap = (data) => {
+    const arr = data.map(item => {
       const obj = {}
-      // obj.key = item._id
-      // obj.username = item.username
-      // obj.role_id = item.role_id
-      // obj.creatTime = getTime(new Date(item.create_time))
       obj.key = item.id
-      obj.username = item.name
+      obj.username = item.user
       obj.email = item.email
       obj.phone = item.phone
       obj.creatTime = item.createTime
-      obj.role_id = item.roleId
+      obj.role_id = item.role
       return obj
     })
     // //查找当前登录的用户对应的role_id，并存在localStorage中，这里默认所有的用户名都是唯一的，但这里实际上不是，因此查找时默认为找的第一个
@@ -39,50 +33,36 @@ function User() {
     //   item.username === getId
     // )
     // storage.remove('role_id')
-    // setTotal(response.data.total)
-    setTotal(response.length)
+    setTotal(data.length)
     setUsers(arr)
     setisLoading(false)
-    // } else {
-    //   message.error('获取列表失败')
-    // }
   }
   //获取列表并对格式进行处理存放在hooks中供后期使用
   const getUsers = async () => {
     setisLoading(true)
-    // const response = await request(`/manage/user/list`)
-    const response = await request(`http://159.75.128.32:5000/api/user/getUsers`)
-    const responseRole = await request('http://159.75.128.32:5000/api/role/getRoles')
+    const response = await request(`${requestUrl}/user/get`)
+    const responseRole = await request(`${requestUrl}/role/get`)
     const roles = responseRole.data
-    // const { roles } = response.data
-    // if (response.status === 0) {
-    const roleNames = roles.reduce((pre, role) => {
-      // pre[role._id] = role.name ? role.name : ""//这里使用了每个id作为对象的属性名，因为每个id都是唯一的，因此使用[]
-      pre[role.id] = role.name ? role.name : ""
-      return pre
-    }, [])
-    // const options = roles.map(role => ({ _id: role._id, name: role.name }))
-    const options = roles.map(role => ({ _id: role.id, name: role.name }))
+    const roleNames = {};
+    roles.map((role) => {
+      roleNames[role.id] = role.roleName ? role.roleName : "佚名";
+      return 0;
+    })
+    const options = roles.map(role => ({ _id: role.id, name: role.roleName }))
     setOptions(options)
     setRoles(roleNames)
-    getMap(response)
-    // } else {
-    //   message.error("获取角色列表失败")
-    // }
+    getMap(response.data)
   }
   const onFinish = async (values) => {
-    // const creat_time = Date.now()
-    // const user = user_id ? { ...values, _id: user_id } : { ...values, creat_time }//这里没有creat_time属性也可以请求成功，可能是因为后台自动创建了一个时间
-    // const response = await request(`/manage/user/${isModalVisible === 1 ? 'add' : 'update'}`, user, "POST")
-    console.log(values)
-    const value = { name: values.username, email: values.email, phone: values.phone, roleId: values.role_id }
-    const creat_time = Date.now()
-    const user = user_id ? { ...value, id: user_id } : { ...value, password: values.password }
-    const response = await request(`http://159.75.128.32:5000/api/user/${isModalVisible === 1 ? 'add' : `update/${user_id}`}`,
-      user, isModalVisible === 1 ?'post':'PUT')
-    // if (response.status === 0) {
-    if (response === 'success') {
-      message.success(`添加成功`)
+    let role_id = values.role_id*1;
+    const value = { 'user': values.username, 'email': values.email, 'phone': values.phone, 'role': String(role_id)!=='NaN'?role_id:roleId }
+    const createTime = getTime(new Date())
+    
+    const user = user_id ? { ...value } : { ...value, pwd: values.password,createTime:createTime }
+    const response = await request(`${requestUrl}/user/${isModalVisible === 1 ? 'addUser' : `updateUser/${user_id}`}`,
+      user, 'post')
+    if (response.success) {
+      message.success(`${isModalVisible === 1 ? `添加成功` : `修改成功`}`)
       setTimeout(() => {
         getUsers()
       }, 500)
@@ -98,6 +78,7 @@ function User() {
       setUser_id(user.key)
       //From下的Item以及各个Input等表单数据在命名name属性后就会变为受控组件，进而不能使用ini以及default
       //等初始值属性动态设置默认值，只能使用form下的一些方法，比如setFieldsValue
+      setRoleId(user.role_id)
       form.setFieldsValue({ 'username': user.username, 'phone': user.phone, 'email': user.email, 'role_id': roles[user.role_id] })
       setIsModalVisible(2)
     } else {
@@ -113,10 +94,8 @@ function User() {
     Modal.confirm({
       title: '删除吗？？？？',
       onOk: async () => {
-        const response = await request(`http://159.75.128.32:5000/api/user/delete/${user.key}`, {}, 'DELETE')
-        // const response = await request('/manage/user/delete', { userId: user.key }, 'post')
-        // if (response.status === 0) {
-        if (response) {
+        const response = await request(`${requestUrl}/user/delete/${user.key}`, {}, 'DELETE')
+        if (response.success) {
           message.success(`删除成功`)
           setTimeout(() => {
             getUsers()

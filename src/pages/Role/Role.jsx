@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Button, Table, Spin, message, Modal, Form, Input, Select, Radio, Tree } from 'antd'
-import request from '../../api/ajax'
+import { Card, Button, Table, Spin,  Modal,Input,  Radio, Tree } from 'antd'
+import {request,requestUrl} from '../../api/ajax'
+
 import './Role.less'
-import axios from 'axios'
-const { TreeNode } = Tree;
+import getTime from '../../utils/getTime'
+import storage from '../../utils/storage'
 function Role() {
   const [isLoading, setisLoading] = useState(true)//判断是否获取到hooks中的请求数据
-  const [roles, setRoles] = useState()
+  const [roles, setRoles] = useState([])
   const [pageNum, setPageNum] = useState(1)
   const [total, setTotal] = useState()
   const [value, setValue] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(0)
   const [roleName, setRoleName] = useState()
-  const [menus, setMenus] = useState()
   const [expandedKeys, setExpandedKeys] = useState(['work']);
-  // const [checkedKeys, setCheckedKeys] = useState(['0-0-0']);
-  // const [selectedKeys, setSelectedKeys] = useState([]);
+  const [checkedKeys, setCheckedKeys] = useState();
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const getMap = (response) => {
     const arr = response.map(item => {
       const role = {}
-      role.roleName = item.name
+      role.roleName = item.roleName
       role.authTime = item.authTime
       role.authName = item.authName
       role.createTime = item.createTime
@@ -33,8 +32,8 @@ function Role() {
   }
   const getRoles = async () => {
     setisLoading(true)
-    const response = await request('http://159.75.128.32:5000/api/role/getRoles')
-    if (response.status === 0) {
+    const response = await request(`${requestUrl}/role/get`)
+    if (response.success) {
       const roles = response.data
       getMap(roles)
     }
@@ -42,10 +41,9 @@ function Role() {
   }
   const onChange = async(e)=> {
     setValue(e.target.value)
-    const responseRole = await request(`http://159.75.128.32:5000/api/role/get/${e.target.value}`)
-    const menus = responseRole.menus.split(',')
-    setMenus(menus)
-    console.log(e.target.value)
+    const responseRole = await request(`${requestUrl}/role/get/${e.target.value}`)
+    const menus = responseRole.data[0].menus
+    setCheckedKeys(menus)
   };
   const createRole = () => {
     setIsModalVisible(1)
@@ -57,19 +55,27 @@ function Role() {
     setIsModalVisible(0)
     setRoleName();
   }
-  const handleOk = () => {
-    setIsModalVisible(0)
-    setRoleName();
+  const handleOk = async() => {
+    const authTime = getTime(new Date())
+    const response = await request(`${requestUrl}/role/updata`,{id:value,menus:checkedKeys,authTime:authTime},"POST")
+    if(response.success){
+      setTimeout(() => {
+        getRoles()
+      }, 500)
+      setIsModalVisible(0)
+      setRoleName();
+    }else{
+      alert('修改失败')
+    }
   }
   const creatByName = async() => {
     // 创建角色接口
-    const response = axios.post('http://159.75.128.32:5000/api/role/createRoleByName',roleName,{headers:{'content-type':'application/json'}})
-    response.then((response)=>{
-      console.log(response.data)
-      if(response.data === 'success'){
+    const authName = storage.get('user').user
+    const createTime = getTime(new Date())
+    const response = await request(`${requestUrl}/role/addRole`,{roleName,authName,createTime},"POST")
+      if(response.success){
           getRoles()
       }
-    })
     setIsModalVisible(0)
     setRoleName();
   }
@@ -77,7 +83,7 @@ function Role() {
     setRoleName(e.target.value);
   };
   const onExpand = (expandedKeysValue) => {
-    console.log('onExpand', expandedKeysValue); 
+    // console.log('onExpand', expandedKeysValue); 
     setExpandedKeys(expandedKeysValue);
     setAutoExpandParent(false);
   };
@@ -167,11 +173,9 @@ function Role() {
       ],
     },
   ];
-  const onSelect = (selectedKeys, info) => {
-    console.log('selected', selectedKeys, info);
-  };
   const onCheck = (checkedKeys, info) => {
-    console.log('onCheck', checkedKeys, info);
+    // console.log('onCheck', checkedKeys);
+    setCheckedKeys(checkedKeys)
   };
   useEffect(() => {
     setTimeout(() => {
@@ -218,7 +222,7 @@ function Role() {
           <Tree
             checkable
             onExpand={onExpand}
-            onSelect={onSelect}
+            checkedKeys={checkedKeys}
             onCheck={onCheck}
             treeData={treeData}
             expandedKeys={expandedKeys}
